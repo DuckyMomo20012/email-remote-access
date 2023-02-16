@@ -1,0 +1,40 @@
+{
+  "name": "my-project-devcontainer",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu", // Any generic, debian-based image.
+  "forwardPorts": [],
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-contrib/features/poetry:2": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      "settings": {},
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "aliariff.auto-add-brackets",
+        "chunsen.bracket-select",
+        "pustelto.bracketeer",
+        "streetsidesoftware.code-spell-checker",
+        "naumovs.color-highlight",
+        "mikestead.dotenv",
+        "EditorConfig.EditorConfig",
+        "usernamehw.errorlens",
+        "GitHub.copilot",
+        "eamodio.gitlens",
+        "ms-python.isort",
+        "bmalehorn.print-it",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "stkb.rewrap",
+        "albert.TabOut",
+        "wayou.vscode-todo-highlight",
+        "vscode-icons-team.vscode-icons"
+      ]
+    }
+  }
+}
