@@ -1,35 +1,34 @@
 # Socket
-import socket
-
-# Thread
-from threading import Thread
-
-# Image
-from PIL import Image, ImageTk
 import io
+import socket
 
 # Tkinter
 import tkinter as tk
+
+# Thread
+from threading import Thread
 from tkinter import Canvas
 from tkinter.filedialog import asksaveasfile
 
-
+# Image
+from PIL import Image, ImageTk
 
 BUFSIZ = 1024 * 4
 
+
 class Desktop_UI(Canvas):
-    def __init__(self, parent, client):    
+    def __init__(self, parent, client):
         Canvas.__init__(self, parent)
         self.configure(
-            #window,
-            bg = "#FCD0E8",
-            height = 600,
-            width = 1000,
-            bd = 0,
-            highlightthickness = 0,
-            relief = "ridge"
+            # window,
+            bg="#FCD0E8",
+            height=600,
+            width=1000,
+            bd=0,
+            highlightthickness=0,
+            relief="ridge",
         )
-        self.place(x = 0, y = 0)
+        self.place(x=0, y=0)
 
         # copy socket connection to own attribute
         self.client = client
@@ -42,25 +41,29 @@ class Desktop_UI(Canvas):
 
         # label to display frames received from server
         self.label = tk.Label(self)
-        self.label.place(x=20,y=0,width=960,height=540)
+        self.label.place(x=20, y=0, width=960, height=540)
 
         # a button to save captured screen
-        self.btn_save = tk.Button(self, text = 'Save', command=lambda: self.click_save(), relief="flat")
-        self.btn_save.place(x=320,y=560,width=50,height=30)        
-        
+        self.btn_save = tk.Button(
+            self, text="Save", command=lambda: self.click_save(), relief="flat"
+        )
+        self.btn_save.place(x=320, y=560, width=50, height=30)
+
         # a button to stop receiving and return to main interface
-        self.btn_back = tk.Button(self, text = 'Back', command=lambda: self.click_back(), relief="flat")
-        self.btn_back.place(x=630,y=560,width=50,height=30)  
+        self.btn_back = tk.Button(
+            self, text="Back", command=lambda: self.click_back(), relief="flat"
+        )
+        self.btn_back.place(x=630, y=560, width=50, height=30)
 
         # thread
         self.start = Thread(target=self.ChangeImage, daemon=True)
         self.start.start()
-    
+
     # display frames continously
     def ChangeImage(self):
-        while self.status:            
+        while self.status:
             sz = int(self.client.recv(100))
-            #self.client.sendall(bytes("READY", "utf8"))
+            # self.client.sendall(bytes("READY", "utf8"))
 
             data = b""
             while len(data) < sz:
@@ -97,10 +100,8 @@ class Desktop_UI(Canvas):
         if self.frame == None:
             return
 
-        types = [('Portable Network Graphics', '*.png'), ('All Files', '*.*')]
-        img_file = asksaveasfile(mode='wb', filetypes=types, defaultextension='*.png')
+        types = [("Portable Network Graphics", "*.png"), ("All Files", "*.*")]
+        img_file = asksaveasfile(mode="wb", filetypes=types, defaultextension="*.png")
         if img_file == None:
             return
         img_file.write(self.frame)
-
-
