@@ -3,7 +3,7 @@ import os
 import re
 import winreg
 
-from client.live_screen_client import BUFSIZ
+from src.client.live_screen_client import BUFSIZ
 
 
 def parse_data(full_path):

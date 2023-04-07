@@ -24,6 +24,7 @@ python = "^3.9"
 environs = "^9.5.0"
 pillow = "^9.5.0"
 psutil = "^5.9.4"
+typer = "^0.7.0"
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.18.1"

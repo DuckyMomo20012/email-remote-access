@@ -2,12 +2,12 @@ import socket
 import tkinter as tk
 
 # import keylogger_server as kl
-import server.app_process_server as ap
-import server.directory_tree_server as dt
-import server.live_screen_server as lss
-import server.mac_address_server as mac
-import server.registry_server as rs
-import server.shutdown_logout_server as sl
+import src.server.app_process_server as ap
+import src.server.directory_tree_server as dt
+import src.server.live_screen_server as lss
+import src.server.mac_address_server as mac
+import src.server.registry_server as rs
+import src.server.shutdown_logout_server as sl
 
 main = tk.Tk()
 main.geometry("200x200")
@@ -96,6 +96,7 @@ def Connect():
 
 
 ###############################################################################
+
 
 tk.Button(
     main,
