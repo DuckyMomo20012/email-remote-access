@@ -1,9 +1,9 @@
-import asyncio
 import threading
 import tkinter as tk
 
 import socketio
-import tornado.web
+import uvicorn
+from fastapi import FastAPI
 
 # import keylogger_server as kl
 import src.server.app_process_server as ap
@@ -53,21 +53,19 @@ class ServerApp:
 
 
 class Server:
-    sio = socketio.AsyncServer(
-        async_mode="tornado", cors_allowed_origins="*", logger=True
-    )
-    app = tornado.web.Application([(r"/socket.io/", socketio.get_tornado_handler(sio))])
+    def __init__(self):
+        self.app = FastAPI()
 
-    def start_server(self):
-        # NOTE: Assign the new event loop to the current thread
-        asyncio.set_event_loop(asyncio.new_event_loop())
-
-        self.app.listen(PORT)
+        self.sio = socketio.AsyncServer(
+            async_mode="asgi", cors_allowed_origins="*", logger=True
+        )
+        self.app = socketio.ASGIApp(self.sio)
 
         # NOTE: Register the callbacks
         self.callbacks()
 
-        tornado.ioloop.IOLoop.instance().start()
+    def start_server(self):
+        uvicorn.run(self.app, host="0.0.0.0", port=PORT)
 
     def callbacks(self):
         @self.sio.on("KEYLOG:start")
