@@ -1,26 +1,24 @@
 import os
 import pickle
 
+import socketio
+
 from src.client.directory_tree_client import BUFFER_SIZE
 
 BUFSIZ = 1024 * 4
 SEPARATOR = "<SEPARATOR>"
 
 
-def showTree(sock):
+def showTree():
     listD = []
     for c in range(ord("A"), ord("Z") + 1):
         path = chr(c) + ":\\"
         if os.path.isdir(path):
             listD.append(path)
-    data = pickle.dumps(listD)
-    sock.sendall(str(len(data)).encode())
-    temp = sock.recv(BUFSIZ)
-    sock.sendall(data)
+    return listD
 
 
-def sendListDirs(sock):
-    path = sock.recv(BUFSIZ).decode()
+def listDirs(path):
     if not os.path.isdir(path):
         return [False, path]
 
@@ -30,105 +28,83 @@ def sendListDirs(sock):
         for d in listD:
             listT.append((d, os.path.isdir(path + "\\" + d)))
 
-        data = pickle.dumps(listT)
-        sock.sendall(str(len(data)).encode())
-        temp = sock.recv(BUFSIZ)
-        sock.sendall(data)
-        return [True, path]
+        return [True, listT]
     except:
-        sock.sendall("error".encode())
-        return [False, "error"]
+        return [False, None]
 
 
-def delFile(sock):
-    p = sock.recv(BUFSIZ).decode()
-    if os.path.exists(p):
+def delFile(path):
+    if os.path.exists(path):
         try:
-            os.remove(p)
-            sock.sendall("ok".encode())
+            os.remove(path)
+            return True
         except:
-            sock.sendall("error".encode())
-            return
+            return False
     else:
-        sock.sendall("error".encode())
-        return
+        return False
 
 
 # copy file from client to server
-def copyFileToServer(sock):
-    received = sock.recv(BUFSIZ).decode()
-    if received == "-1":
-        sock.sendall("-1".encode())
-        return
-    filename, filesize, path = received.split(SEPARATOR)
+def copyFileToServer(metadata, data):
+    [filename, filesize, path] = metadata.split(SEPARATOR)
     filename = os.path.basename(filename)
     filesize = int(filesize)
-    sock.sendall("received filename".encode())
-    data = b""
-    while len(data) < filesize:
-        packet = sock.recv(999999)
-        data += packet
-    if data == "-1":
-        sock.sendall("-1".encode())
-        return
     try:
         with open(path + filename, "wb") as f:
+            print("data", data)
             f.write(data)
-        sock.sendall("received content".encode())
+        return True
     except:
-        sock.sendall("-1".encode())
+        return False
 
 
 # copy file from server to client
-def copyFileToClient(sock):
-    filename = sock.recv(BUFSIZ).decode()
-    if filename == "-1" or not os.path.isfile(filename):
-        sock.sendall("-1".encode())
-        return
-    filesize = os.path.getsize(filename)
-    sock.sendall(str(filesize).encode())
-    temp = sock.recv(BUFSIZ)
+def copyFileToClient(filename):
+    if not os.path.isfile(filename):
+        return [False, None]
     with open(filename, "rb") as f:
         data = f.read()
-        sock.sendall(data)
+        print("data", data)
+        return [True, data]
 
 
-def directory(client):
-    isMod = False
+def directory(sio: socketio.AsyncServer):
+    @sio.on("DIRECTORY:show_tree")
+    async def show(sid):
+        await sio.emit("DIRECTORY:show_tree:data", showTree())
 
-    while True:
-        if not isMod:
-            mod = client.recv(BUFSIZ).decode()
+    @sio.on("DIRECTORY:list_dirs")
+    async def list_dirs(sid, data):
+        [status, dirs] = listDirs(data)
 
-        if mod == "SHOW":
-            showTree(client)
-            while True:
-                check = sendListDirs(client)
-                if not check[0]:
-                    mod = check[1]
-                    if mod != "error":
-                        isMod = True
-                        break
-
-        # copy file from client to server
-        elif mod == "COPYTO":
-            client.sendall("OK".encode())
-            copyFileToServer(client)
-            isMod = False
-
-        # copy file from server to client
-        elif mod == "COPY":
-            client.sendall("OK".encode())
-            copyFileToClient(client)
-            isMod = False
-
-        elif mod == "DEL":
-            client.sendall("OK".encode())
-            delFile(client)
-            isMod = False
-
-        elif mod == "QUIT":
-            return
-
+        if status:
+            await sio.emit("DIRECTORY:list_dirs:data", dirs)
         else:
-            client.sendall("-1".encode())
+            await sio.emit("DIRECTORY:list_dirs:error")
+
+    @sio.on("DIRECTORY:copyto")
+    async def copyto(sid, data):
+        copyFileStatus = copyFileToServer(data["metadata"], data["data"])
+        if copyFileStatus:
+            await sio.emit("DIRECTORY:copyto:status", "OK")
+        else:
+            await sio.emit("DIRECTORY:copyto:status", "NOT OK")
+
+    @sio.on("DIRECTORY:copy")
+    async def copy(sid, data):
+        [status, fileData] = copyFileToClient(data)
+        if status:
+            await sio.emit(
+                "DIRECTORY:copy:data",
+                {"filename": os.path.basename(data), "fileData": fileData},
+            )
+        else:
+            await sio.emit("DIRECTORY:copy:error")
+
+    @sio.on("DIRECTORY:delete")
+    async def delete(sid, data):
+        delStatus = delFile(data)
+        if delStatus:
+            await sio.emit("DIRECTORY:delete:status", "OK")
+        else:
+            await sio.emit("DIRECTORY:delete:status", "NOT OK")
