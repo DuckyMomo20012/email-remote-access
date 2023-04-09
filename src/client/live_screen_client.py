@@ -10,6 +10,8 @@ from threading import Thread
 from tkinter import Canvas
 from tkinter.filedialog import asksaveasfile
 
+import socketio
+
 # Image
 from PIL import Image, ImageTk
 
@@ -17,7 +19,7 @@ BUFSIZ = 1024 * 4
 
 
 class Desktop_UI(Canvas):
-    def __init__(self, parent, client):
+    def __init__(self, parent: tk.Tk, sio: socketio.Client):
         Canvas.__init__(self, parent)
         self.configure(
             # window,
@@ -31,7 +33,7 @@ class Desktop_UI(Canvas):
         self.place(x=0, y=0)
 
         # copy socket connection to own attribute
-        self.client = client
+        self.sio = sio
 
         # initialize status to ready receiving data
         self.status = True
@@ -61,40 +63,29 @@ class Desktop_UI(Canvas):
 
     # display frames continously
     def ChangeImage(self):
-        while self.status:
-            sz = int(self.client.recv(100))
-            # self.client.sendall(bytes("READY", "utf8"))
-
-            data = b""
-            while len(data) < sz:
-                packet = self.client.recv(999999)
-                data += packet
-
+        @self.sio.on("LIVESCREEN:stream")
+        def stream(data):
             img_PIL = Image.open(io.BytesIO(data)).resize((960, 540), Image.ANTIALIAS)
             img_tk = ImageTk.PhotoImage(img_PIL)
             self.label.configure(image=img_tk)
             self.label.image = img_tk
 
-            # check save image command
-            # while saving image, server will delay capturing and wait for the next command from client
-            if self.on_save:
-                self.frame = data
-                self.save_img()
-                self.on_save = False
-
-            # check stop command
-            if self.status:
-                self.client.sendall(bytes("NEXT_FRAME", "utf8"))
-            else:
-                self.client.sendall(bytes("STOP_RECEIVING", "utf8"))
-        # Return the main UI
-        self.place_forget()
+            self.frame = data
 
     def click_back(self):
         self.status = False
 
+        self.sio.emit("LIVESCREEN:stop")
+
+        self.place_forget()
+
     def click_save(self):
         self.on_save = True
+        self.sio.emit("LIVESCREEN:stop")
+
+        self.save_img()
+        self.on_save = False
+        self.sio.emit("LIVESCREEN:start")
 
     def save_img(self):
         if self.frame == None:
