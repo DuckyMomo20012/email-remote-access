@@ -5,6 +5,8 @@ import sys
 import tkinter as tk
 from tkinter import Button, Canvas, PhotoImage, ttk
 
+import socketio
+
 BUFSIZ = 1024 * 4
 
 
@@ -51,35 +53,33 @@ def switch(btn, tab):
     return
 
 
-def send_kill(client):
-    global pid
-    client.sendall(bytes("0", "utf8"))
-    client.sendall(bytes(str(pid.get()), "utf8"))
-    res = client.recv(BUFSIZ).decode("utf8")
-    if "1" in res:
-        tk.messagebox.showinfo(message="Đã diệt!")
-    else:
-        tk.messagebox.showerror(message="Lỗi!")
+def send_kill(sio: socketio.Client, pid):
+    sio.emit("APP_PRO:kill_proc", pid)
+
+    @sio.on("APP_PRO:kill_proc:status")
+    def on_message(data):
+        if data == 1:
+            tk.messagebox.showinfo(message="Đã diệt!")
+        else:
+            tk.messagebox.showerror(message="Lỗi!")
+
     return
 
 
-def _list(client, tab, s):
-    client.sendall(bytes("1", "utf8"))
-    client.sendall(bytes(s, "utf8"))
-    ls1 = receive(client)
-    ls1 = pickle.loads(ls1)
-    ls2 = receive(client)
-    ls2 = pickle.loads(ls2)
-    ls3 = receive(client)
-    ls3 = pickle.loads(ls3)
-    print(ls1)
-    print(ls2)
-    print(ls3)
-    for i in tab.get_children():
-        tab.delete(i)
-    for i in range(len(ls1)):
-        tab.insert(parent="", index="end", text="", values=(ls1[i], ls2[i], ls3[i]))
-    return
+def _list(sio: socketio.Client, tab, s):
+    if s == "PROCESS":
+        sio.emit("APP_PRO:list_proc:proc")
+    elif s == "APPLICATION":
+        sio.emit("APP_PRO:list_proc:app")
+
+    @sio.on("APP_PRO:list_proc:status")
+    def on_message(data):
+        ls1, ls2, ls3 = data
+        for i in tab.get_children():
+            tab.delete(i)
+        for i in range(len(ls1)):
+            tab.insert(parent="", index="end", text="", values=(ls1[i], ls2[i], ls3[i]))
+        return
 
 
 def clear(tab):
@@ -88,14 +88,12 @@ def clear(tab):
     return
 
 
-def send_start(client):
-    global pname
-    client.sendall(bytes("3", "utf8"))
-    client.sendall(bytes(str(pname.get()), "utf8"))
+def send_start(sio: socketio.Client, pname):
+    sio.emit("APP_PRO:start_proc", pname)
     return
 
 
-def start(root, client):
+def start(root, sio: socketio.Client):
     global pname
     pstart = tk.Toplevel(root)
     pstart["bg"] = "plum1"
@@ -111,13 +109,13 @@ def start(root, client):
         bg="IndianRed3",
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: send_start(client),
+        command=lambda: send_start(sio, pname=pname.get()),
         relief="flat",
     ).grid(row=0, column=1)
     return
 
 
-def kill(root, client):
+def kill(root, sio: socketio.Client):
     global pid
     kill = tk.Toplevel(root)
     kill["bg"] = "plum1"
@@ -133,14 +131,14 @@ def kill(root, client):
         bg="IndianRed3",
         borderwidth=0,
         highlightthickness=0,
-        command=lambda: send_kill(client),
+        command=lambda: send_kill(sio, pid=pid.get()),
         relief="flat",
     ).grid(row=0, column=1)
     return
 
 
 class App_Process_UI(Canvas):
-    def __init__(self, parent, client):
+    def __init__(self, parent, sio: socketio.Client):
         Canvas.__init__(self, parent)
         self.configure(
             # window,
@@ -194,7 +192,7 @@ class App_Process_UI(Canvas):
             # image=button_image_2,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: kill(parent, client),
+            command=lambda: kill(parent, sio),
             relief="flat",
         )
         self.button_2.place(x=838.0, y=152.0, width=135.0, height=53.0)
@@ -208,7 +206,7 @@ class App_Process_UI(Canvas):
             # image=button_image_3,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: _list(client, self.tab, self.button_1["text"]),
+            command=lambda: _list(sio, self.tab, self.button_1["text"]),
             relief="flat",
         )
         self.button_3.place(x=838.0, y=238.0, width=135.0, height=53.0)
@@ -236,7 +234,7 @@ class App_Process_UI(Canvas):
             # image=button_image_5,
             borderwidth=0,
             highlightthickness=0,
-            command=lambda: start(parent, client),
+            command=lambda: start(parent, sio),
             relief="flat",
         )
         self.button_5.place(x=839.0, y=396.0, width=135.0, height=53.0)
