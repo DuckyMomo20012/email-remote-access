@@ -1,25 +1,27 @@
 import tkinter as tk
 
+import socketio
 
-def close_event(main, client):
-    client.sendall(bytes("QUIT", "utf8"))
+
+def close_event(main: tk.Toplevel, sio: socketio.Client):
+    sio.emit("QUIT")
     main.destroy()
     return
 
 
-def shutdown(client):
-    client.sendall(bytes("SHUTDOWN", "utf8"))
+def shutdown(sio: socketio.Client):
+    sio.emit("SD_LO:shutdown")
 
 
-def logout(client):
-    client.sendall(bytes("LOGOUT", "utf8"))
+def logout(sio: socketio.Client):
+    sio.emit("SD_LO:logout")
 
 
-def shutdown_logout(client, root):
+def shutdown_logout(sio: socketio.Client, root: tk.Tk):
     window = tk.Toplevel(root)
     window.geometry("190x160")
     window.grab_set()
-    window.protocol("WM_DELETE_WINDOW", lambda: close_event(window, client))
+    window.protocol("WM_DELETE_WINDOW", lambda: close_event(window, sio))
     shutdown_btn = tk.Button(
         window,
         text="SHUTDOWN",
@@ -27,7 +29,7 @@ def shutdown_logout(client, root):
         height=2,
         fg="white",
         bg="IndianRed3",
-        command=lambda: shutdown(client),
+        command=lambda: shutdown(sio),
         padx=20,
         pady=20,
     )
@@ -39,7 +41,7 @@ def shutdown_logout(client, root):
         height=2,
         fg="white",
         bg="royalblue4",
-        command=lambda: logout(client),
+        command=lambda: logout(sio),
         padx=20,
         pady=20,
     )
