@@ -1,6 +1,9 @@
 import uuid
 
 
-def mac_address(client):
-    client.sendall(bytes(hex(uuid.getnode()), "utf8"))
+async def mac_address(sio):
+    await sio.emit(
+        "MAC:info",
+        bytes(hex(uuid.getnode()), "utf8"),
+    )
     return
