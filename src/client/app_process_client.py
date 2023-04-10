@@ -33,9 +33,9 @@ def switch(btn, tab):
 
 
 def send_kill(sio: socketio.Client, pid):
-    sio.emit("APP_PRO:kill_proc", pid)
+    sio.emit("APP_PRO:kill", pid)
 
-    @sio.on("APP_PRO:kill_proc:status")
+    @sio.on("APP_PRO:kill:status")
     def on_message(data):
         if data == 1:
             tk.messagebox.showinfo(message="Đã diệt!")
@@ -47,11 +47,11 @@ def send_kill(sio: socketio.Client, pid):
 
 def _list(sio: socketio.Client, tab, s):
     if s == "PROCESS":
-        sio.emit("APP_PRO:list_proc:proc")
+        sio.emit("APP_PRO:list")
     elif s == "APPLICATION":
-        sio.emit("APP_PRO:list_proc:app")
+        sio.emit("APP_PRO:list:app")
 
-    @sio.on("APP_PRO:list_proc:status")
+    @sio.on("APP_PRO:list:status")
     def on_message(data):
         ls1, ls2, ls3 = data
         for i in tab.get_children():
@@ -68,7 +68,7 @@ def clear(tab):
 
 
 def send_start(sio: socketio.Client, pname):
-    sio.emit("APP_PRO:start_proc", pname)
+    sio.emit("APP_PRO:start", pname)
     return
 
 

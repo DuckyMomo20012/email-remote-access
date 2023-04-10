@@ -4,7 +4,7 @@ import socketio
 
 
 def mac_address(sio: socketio.Client):
-    @sio.on("MAC:info")
+    @sio.on("MAC:info:data")
     def info(data):
         res = data.decode("utf8")
         res = res[2:].upper()
