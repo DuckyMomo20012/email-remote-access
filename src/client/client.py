@@ -1,6 +1,8 @@
 import socket
 import tkinter as tk
 
+import socketio
+
 import src.client.app_process_client as ap
 import src.client.directory_tree_client as dt
 import src.client.entrance_ui as ui1
@@ -10,11 +12,14 @@ import src.client.mac_address_client as mac
 import src.client.main_ui as ui2
 import src.client.registry_client as rc
 import src.client.shutdown_logout_client as sl
+from src.server.server import PORT
 
 BUFSIZ = 1024 * 4
 
 
-class Client:
+class ClientApp:
+    sio = socketio.Client(logger=True)
+
     def __init__(self):
         self.root = tk.Tk()
         self.root.geometry("1000x600")
@@ -25,71 +30,82 @@ class Client:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.f1 = ui1.Entrance_UI(self.root)
-        self.f1.button_1.configure(command=self.connect)
+        self.f1.button_1.configure(command=self.connectServer)
 
     def start(self):
         self.root.mainloop()
 
+    def callbacks(self):
+        @self.sio.event
+        def connect():
+            tk.messagebox.showinfo(message="Connect successfully!")
+
+            self.show_main_ui()
+
+        @self.sio.event
+        def connect_error(data):
+            tk.messagebox.showerror(message="Cannot connect!")
+
     def back(self, ui):
         ui.place_forget()
         f2.place(x=0, y=0)
-        self.client.sendall(bytes("QUIT", "utf8"))
+        self.sio.emit("QUIT")
 
     def live_screen(self):
-        self.client.sendall(bytes("LIVESCREEN", "utf8"))
-        tmp = lsc.Desktop_UI(self.root, self.client)
+        self.sio.emit("LIVESCREEN:start")
+        tmp = lsc.Desktop_UI(self.root, self.sio)
         if not tmp.status:
             self.back(tmp)
         return
 
     def shutdown_logout(self):
-        self.client.sendall(bytes("SD_LO", "utf8"))
-        sl.shutdown_logout(self.client, self.root)
+        self.sio.emit("SD_LO:start")
+        sl.shutdown_logout(self.sio, self.root)
         return
 
     def mac_address(self):
-        self.client.sendall(bytes("MAC", "utf8"))
-        mac.mac_address(self.client)
+        self.sio.emit("MAC:start")
+        mac.mac_address(self.sio)
         return
 
     def back_dirTree(self, ui):
         ui.place_forget()
         ui.tree.pack_forget()
         f2.place(x=0, y=0)
-        self.client.sendall(bytes("QUIT", "utf8"))
+        self.sio.emit("QUIT")
 
     def directory_tree(self):
-        self.client.sendall(bytes("DIRECTORY", "utf8"))
-        tmp = dt.DirectoryTree_UI(self.root, self.client)
+        self.sio.emit("DIRECTORY:start")
+        tmp = dt.DirectoryTree_UI(self.root, self.sio)
         tmp.button_6.configure(command=lambda: self.back_dirTree(tmp))
         return
 
     def app_process(self):
-        self.client.sendall(bytes("APP_PRO", "utf8"))
-        tmp = ap.App_Process_UI(self.root, self.client)
+        self.sio.emit("APP_PRO:start")
+        tmp = ap.App_Process_UI(self.root, self.sio)
         tmp.button_6.configure(command=lambda: self.back(tmp))
         return
 
     def disconnect(self):
         f2.place_forget()
         self.f1.place(x=0, y=0)
-        self.client.sendall(bytes("QUIT", "utf8"))
+        self.sio.emit("QUIT")
         return
 
     def keylogger(self):
-        self.client.sendall(bytes("KEYLOG", "utf8"))
-        tmp = kl.Keylogger_UI(self.root, self.client)
+        self.sio.emit("KEYLOG:start")
+        tmp = kl.Keylogger_UI(self.root, self.sio)
         tmp.button_6.configure(command=lambda: self.back(tmp))
         return
 
     def registry(self):
-        self.client.sendall(bytes("REGISTRY", "utf8"))
-        tmp = rc.Registry_UI(self.root, self.client)
+        self.sio.emit("REGISTRY:start")
+        tmp = rc.Registry_UI(self.root, self.sio)
         tmp.btn_back.configure(command=lambda: self.back_reg(tmp))
         return
 
     def back_reg(self, ui):
-        ui.client.sendall(bytes("STOP_EDIT_REGISTRY", "utf8"))
+        self.sio.emit("REGISTRY:stop")
         ui.place_forget()
         f2.place(x=0, y=0)
 
@@ -107,20 +123,17 @@ class Client:
         f2.button_8.configure(command=self.shutdown_logout)
         return
 
-    def connect(self):
-        # global client
+    def connectServer(self):
+        # NOTE: Register the callbacks
+        self.callbacks()
+
         ip = self.f1.input.get()
-        try:
-            self.client.connect((ip, 5656))
-            tk.messagebox.showinfo(message="Connect successfully!")
-            self.show_main_ui()
-        except:
-            tk.messagebox.showerror(message="Cannot connect!")
-        return
+
+        self.sio.connect(f"http://{ip}:{PORT}")
 
 
 def main():
-    Client().start()
+    ClientApp().start()
 
 
 if __name__ == "__main__":

@@ -1,5 +1,9 @@
-import socket
+import threading
 import tkinter as tk
+
+import socketio
+import uvicorn
+from fastapi import FastAPI
 
 # import keylogger_server as kl
 import src.server.app_process_server as ap
@@ -10,16 +14,17 @@ import src.server.registry_server as rs
 import src.server.shutdown_logout_server as sl
 
 BUFSIZ = 1024 * 4
+PORT = 5656
 
 
-class Server:
+class ServerApp:
     def __init__(self):
         self.main = tk.Tk()
         self.main.geometry("200x200")
         self.main.title("Server")
         self.main["bg"] = "plum1"
 
-        tk.Button(
+        self.start_btn = tk.Button(
             self.main,
             text="OPEN",
             width=10,
@@ -30,85 +35,85 @@ class Server:
             highlightthickness=0,
             command=self.connect,
             relief="flat",
-        ).place(x=100, y=100, anchor="center")
+        )
+        self.start_btn.place(x=100, y=100, anchor="center")
 
     def start(self):
+        print("Server is running...")
         self.main.mainloop()
 
-    def keylogger(self, client):
-        # global client
-        # kl.keylog(client)
-        return
-
-    def shutdown_logout(self, client):
-        # global client
-        sl.shutdown_logout(client)
-        return
-
-    def mac_address(self, client):
-        # global client
-        mac.mac_address(client)
-        return
-
-    def app_process(self, client):
-        # global client
-        ap.app_process(client)
-        return
-
-    def live_screen(self, client):
-        # global client
-        lss.capture_screen(client)
-        return
-        return
-
-    def directory_tree(self, client):
-        # global client
-        dt.directory(client)
-        return
-
-    def registry(self, client):
-        # global client
-        rs.registry(client)
-        return
-
-    # Connect
-    ###############################################################################
     def connect(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host = ""
-        port = 5656
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.bind((host, port))
-        s.listen(100)
-        # global client
-        client, addr = s.accept()
-        while True:
-            msg = client.recv(BUFSIZ).decode("utf8")
-            if "KEYLOG" in msg:
-                self.keylogger(client)
-            elif "SD_LO" in msg:
-                self.shutdown_logout(client)
-            elif "LIVESCREEN" in msg:
-                self.live_screen(client)
-            elif "APP_PRO" in msg:
-                self.app_process(client)
-            elif "MAC" in msg:
-                self.mac_address(client)
-            elif "DIRECTORY" in msg:
-                self.directory_tree(client)
-            elif "REGISTRY" in msg:
-                self.registry(client)
-            elif "QUIT" in msg:
-                client.close()
-                s.close()
-                return
+        server = Server()
+
+        t = threading.Thread(target=server.start_server)
+        t.daemon = True
+        t.start()
+
+        self.start_btn["state"] = tk.DISABLED
+
+
+class Server:
+    def __init__(self):
+        self.app = FastAPI()
+
+        self.sio = socketio.AsyncServer(
+            async_mode="asgi", cors_allowed_origins="*", logger=True
+        )
+        self.app = socketio.ASGIApp(self.sio)
+
+        # NOTE: Register the callbacks
+        self.callbacks()
+
+    def start_server(self):
+        uvicorn.run(self.app, host="0.0.0.0", port=PORT)
+
+    def callbacks(self):
+        @self.sio.on("KEYLOG:start")
+        def keylogger(sid):
+            # kl.keylog(self.sio)
+            return
+
+        @self.sio.on("SD_LO:start")
+        def shutdown_logout(sid):
+            sl.shutdown_logout(self.sio)
+            return
+
+        @self.sio.on("MAC:start")
+        async def mac_address(sid):
+            await mac.mac_address(self.sio)
+            return
+
+        @self.sio.on("APP_PRO:start")
+        def app_process(sid):
+            ap.app_process(self.sio)
+            return
+
+        @self.sio.on("LIVESCREEN:start")
+        async def live_screen(sid):
+            await lss.capture_screen(self.sio)
+            return
+
+        @self.sio.on("DIRECTORY:start")
+        def directory_tree(sid):
+            dt.directory(self.sio)
+            return
+
+        @self.sio.on("REGISTRY:start")
+        def registry(sid):
+            rs.registry(self.sio)
+            return
+
+        @self.sio.on("QUIT")
+        def quit(sid):
+            exit(1)
+            return
 
 
 ###############################################################################
 
 
 def main():
-    Server().start()
+    ServerApp().start()
 
 
 if __name__ == "__main__":

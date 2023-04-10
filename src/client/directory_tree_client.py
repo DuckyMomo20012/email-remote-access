@@ -5,6 +5,8 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import Button, Canvas, PhotoImage, Text, filedialog, messagebox
 
+import socketio
+
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 4096
 
@@ -21,32 +23,10 @@ def abs_path(file_name):
     return os.path.join(base_path, file_name)
 
 
-def listDirs(client, path):
-    client.sendall(path.encode())
-
-    data_size = int(client.recv(BUFFER_SIZE))
-    if data_size == -1:
-        messagebox.showerror(
-            message="Click SHOW button again to watch the new directory tree!"
-        )
-        return []
-    client.sendall("received filesize".encode())
-    data = b""
-    while len(data) < data_size:
-        packet = client.recv(999999)
-        data += packet
-    if data == "error":
-        messagebox.showerror(message="Cannot open this directory!")
-        return []
-
-    loaded_list = pickle.loads(data)
-    return loaded_list
-
-
 class DirectoryTree_UI(Canvas):
-    def __init__(self, parent, client):
+    def __init__(self, parent, sio: socketio.Client):
         Canvas.__init__(self, parent)
-        self.client = client
+        self.sio = sio
         self.currPath = " "
         self.nodes = dict()
 
@@ -171,9 +151,7 @@ class DirectoryTree_UI(Canvas):
         if abspath:
             self.tree.delete(self.tree.get_children(node))
             try:
-                dirs = listDirs(self.client, abspath)
-                for p in dirs:
-                    self.insert_node(node, p[0], os.path.join(abspath, p[0]), p[1])
+                self.listDirs(node, abspath)
             except:
                 messagebox.showerror(message="Cannot open this directory!")
 
@@ -201,97 +179,84 @@ class DirectoryTree_UI(Canvas):
 
     def showTree(self):
         self.deleteTree()
-        self.client.sendall("SHOW".encode())
+        self.sio.emit("DIRECTORY:show_tree")
 
-        data_size = int(self.client.recv(BUFFER_SIZE))
-        self.client.sendall("received filesize".encode())
-        data = b""
-        while len(data) < data_size:
-            packet = self.client.recv(999999)
-            data += packet
-        loaded_list = pickle.loads(data)
+        @self.sio.on("DIRECTORY:show_tree:data")
+        def showTreeData(data):
+            for path in data:
+                try:
+                    abspath = os.path.abspath(path)
+                    self.insert_node("", abspath, abspath, True)
+                except:
+                    continue
 
-        for path in loaded_list:
-            try:
-                abspath = os.path.abspath(path)
-                self.insert_node("", abspath, abspath, True)
-            except:
-                continue
+    def listDirs(self, node, path):
+        self.sio.emit("DIRECTORY:list_dirs", path)
+
+        @self.sio.on("DIRECTORY:list_dirs:data")
+        def listDirsData(data):
+            for p in data:
+                self.insert_node(node, p[0], os.path.join(path, p[0]), p[1])
+
+        @self.sio.on("DIRECTORY:list_dirs:error")
+        def listDirsError():
+            messagebox.showerror(message="Cannot open this directory!")
 
     # copy file from client to server
     def copyFileToServer(self):
-        self.client.sendall("COPYTO".encode())
-        isOk = self.client.recv(BUFFER_SIZE).decode()
-        if isOk == "OK":
-            filename = filedialog.askopenfilename(
-                title="Select File", filetypes=[("All Files", "*.*")]
-            )
-            if filename == None or filename == "":
-                self.client.sendall("-1".encode())
-                temp = self.client.recv(BUFFER_SIZE)
-                return
-            destPath = self.currPath + "\\"
-            filesize = os.path.getsize(filename)
-            self.client.send(
-                f"{filename}{SEPARATOR}{filesize}{SEPARATOR}{destPath}".encode()
-            )
-            isReceived = self.client.recv(BUFFER_SIZE).decode()
-            if isReceived == "received filename":
-                try:
-                    with open(filename, "rb") as f:
-                        data = f.read()
-                        self.client.sendall(data)
-                except:
-                    self.client.sendall("-1".encode())
-                isReceivedContent = self.client.recv(BUFFER_SIZE).decode()
-                if isReceivedContent == "received content":
-                    messagebox.showinfo(message="Copy successfully!")
-                    return True
-        messagebox.showerror(message="Cannot copy!")
-        return False
+        filename = filedialog.askopenfilename(
+            title="Select File", filetypes=[("All Files", "*.*")]
+        )
+        if filename == None or filename == "":
+            return
+        destPath = self.currPath + "\\"
+        filesize = os.path.getsize(filename)
+        self.sio.emit(
+            "DIRECTORY:copyto",
+            {
+                "metadata": f"{filename}{SEPARATOR}{filesize}{SEPARATOR}{destPath}",
+                "data": open(filename, "rb").read(),
+            },
+        )
+
+        @self.sio.on("DIRECTORY:copyto:status")
+        def copyFileToServerStatus(data):
+            if data == "OK":
+                messagebox.showinfo(message="Copy file successfully!")
+            else:
+                messagebox.showerror(message="Cannot copy file!")
 
     # copy file from server to client
     def copyFileToClient(self):
-        self.client.sendall("COPY".encode())
-        isOk = self.client.recv(BUFFER_SIZE).decode()
-        if isOk == "OK":
-            try:
-                destPath = filedialog.askdirectory()
-                if destPath == None or destPath == "":
-                    self.client.sendall("-1".encode())
-                    temp = self.client.recv(BUFFER_SIZE)
-                    return
-                self.client.sendall(self.currPath.encode())
-                filename = os.path.basename(self.currPath)
-                filesize = int(self.client.recv(100))
-                if filesize == -1:
-                    messagebox.showerror(message="Cannot copy!")
-                    return
-                self.client.sendall("received filesize".encode())
-                data = b""
-                while len(data) < filesize:
-                    packet = self.client.recv(999999)
-                    data += packet
-                with open(destPath + "\\" + filename, "wb") as f:
-                    f.write(data)
-                messagebox.showinfo(message="Copy successfully!")
-            except:
-                messagebox.showerror(message="Cannot copy!")
-        else:
-            messagebox.showerror(message="Cannot copy!")
+        destPath = filedialog.askdirectory()
+        if destPath == None or destPath == "":
+            return
+
+        self.sio.emit(
+            "DIRECTORY:copy",
+            self.currPath,
+        )
+
+        @self.sio.on("DIRECTORY:copy:data")
+        def copyFileToClientData(data):
+            with open(os.path.abspath(destPath) + "\\" + data["filename"], "wb") as f:
+                f.write(data["fileData"])
+
+            messagebox.showinfo(message="Copy file successfully!")
+
+        @self.sio.on("DIRECTORY:copy:error")
+        def copyFileToClientError():
+            messagebox.showerror(message="Cannot copy file!")
 
     def deleteFile(self):
-        self.client.sendall("DEL".encode())
-        isOk = self.client.recv(BUFFER_SIZE).decode()
-        if isOk == "OK":
-            self.client.sendall(self.currPath.encode())
-            res = self.client.recv(BUFFER_SIZE).decode()
-            if res == "ok":
-                messagebox.showinfo(message="Delete successfully!")
+        self.sio.emit("DIRECTORY:delete", self.currPath)
+
+        @self.sio.on("DIRECTORY:delete:status")
+        def deleteFileStatus(data):
+            if data == "OK":
+                messagebox.showinfo(message="Delete file successfully!")
             else:
-                messagebox.showerror(message="Cannot delete!")
-        else:
-            messagebox.showerror(message="Cannot delete!")
+                messagebox.showerror(message="Cannot delete file!")
 
     def back(self):
         return

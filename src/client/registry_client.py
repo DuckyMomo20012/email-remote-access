@@ -5,11 +5,13 @@ import tkinter as tk
 from tkinter import Canvas, filedialog
 from tkinter.filedialog import asksaveasfile
 
+import socketio
+
 BUFSIZ = 32768
 
 
 class Registry_UI(Canvas):
-    def __init__(self, parent, client):
+    def __init__(self, parent: tk.Tk, sio: socketio.Client):
         Canvas.__init__(self, parent)
         self.configure(
             # window,
@@ -22,7 +24,7 @@ class Registry_UI(Canvas):
         )
         self.place(x=0, y=0)
         # copy socket connection to own attribute
-        self.client = client
+        self.sio = sio
         # attributes of registry keys/values
         self.action_ID = None
         self.key = None
@@ -207,27 +209,29 @@ class Registry_UI(Canvas):
         }
         msg = json.dumps(msg)
         msg_bytes = bytes(msg, "utf8")
-        msg_sz = str(len(msg_bytes))
-        self.client.sendall(bytes(msg_sz, "utf8"))
-        self.client.sendall(msg_bytes)
-        self.res1 = self.client.recv(BUFSIZ).decode("utf8")
-        self.res2 = self.client.recv(BUFSIZ).decode("utf8")
-        if self.action_ID == 1:
-            if "0" in self.res1:
-                tk.messagebox.showerror(
-                    title="Thông báo", message="Thao tác không hợp lệ"
-                )
+
+        self.sio.emit("REGISTRY:edit", msg_bytes)
+
+        @self.sio.on("REGISTRY:status")
+        def on_status(data):
+            [self.res1, self.res2] = data
+
+            if self.action_ID == 1:
+                if "0" in self.res1:
+                    tk.messagebox.showerror(
+                        title="Thông báo", message="Thao tác không hợp lệ"
+                    )
+                else:
+                    tk.messagebox.showinfo(title="Thông báo", message=self.res2)
             else:
-                tk.messagebox.showinfo(title="Thông báo", message=self.res2)
-        else:
-            if "0" in self.res1:
-                tk.messagebox.showerror(
-                    title="Thông báo", message="Thao tác không hợp lệ"
-                )
-            else:
-                tk.messagebox.showinfo(title="Thông báo", message="Thành công")
+                if "0" in self.res1:
+                    tk.messagebox.showerror(
+                        title="Thông báo", message="Thao tác không hợp lệ"
+                    )
+                else:
+                    tk.messagebox.showinfo(title="Thông báo", message="Thành công")
 
     def click_back(self):
         self.status = False
-        self.client.sendall(bytes("STOP_EDIT_REGISTRY", "utf8"))
+        self.sio.emit("REGISTRY:stop")
         return

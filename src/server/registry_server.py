@@ -3,6 +3,8 @@ import os
 import re
 import winreg
 
+import socketio
+
 from src.client.live_screen_client import BUFSIZ
 
 
@@ -161,18 +163,15 @@ def delete_key(full_path):
         return ["0", "0"]
 
 
-def registry(client):
+def registry(sio: socketio.AsyncServer):
     BUFSIZ = 32768
-    while True:
-        header = client.recv(BUFSIZ).decode("utf8")
-        if "STOP_EDIT_REGISTRY" in header:
-            break
-        data_sz = int(header)
-        data = b""
-        while len(data) < data_sz:
-            packet = client.recv(BUFSIZ)
-            data += packet
 
+    # @sio.on("REGISTRY:stop")
+    # def stop_edit_registry():
+    #     sio.disconnect()
+
+    @sio.on("REGISTRY:edit")
+    async def edit_registry(sid, data):
         msg = json.loads(data.decode("utf8"))
         # extract elements
         ID = msg["ID"]
@@ -214,7 +213,7 @@ def registry(client):
 
         elif ID == 4:
             res = delete_key(full_path + r"\\")
-        client.sendall(bytes(res[0], "utf8"))
-        client.sendall(bytes(str(res[1]), "utf8"))
+
+        await sio.emit("REGISTRY:status", [res[0], res[1]])
 
     return
