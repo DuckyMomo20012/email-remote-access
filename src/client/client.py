@@ -27,10 +27,18 @@ class ClientApp:
         self.root.title("Client")
         self.root.resizable(False, False)
 
-        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.root.protocol("WM_DELETE_WINDOW", self.__del__)
 
         self.f1 = ui1.Entrance_UI(self.root)
         self.f1.button_1.configure(command=self.connectServer)
+
+    def __del__(self):
+        self.sio.disconnect()
+
+        try:
+            self.root.destroy()
+        except tk.TclError:
+            pass
 
     def start(self):
         self.root.mainloop()
