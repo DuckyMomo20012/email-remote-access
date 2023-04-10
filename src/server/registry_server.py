@@ -161,13 +161,13 @@ def delete_key(full_path):
         return ["0", "0"]
 
 
-def registry(sio: socketio.AsyncServer):
+def callbacks(sio: socketio.AsyncServer):
     # @sio.on("REGISTRY:stop")
     # def stop_edit_registry():
     #     sio.disconnect()
 
     @sio.on("REGISTRY:edit")
-    async def edit_registry(sid, data):
+    async def on_registry_edit(sid, data):
         msg = json.loads(data.decode("utf8"))
         # extract elements
         ID = msg["ID"]
@@ -210,6 +210,4 @@ def registry(sio: socketio.AsyncServer):
         elif ID == 4:
             res = delete_key(full_path + r"\\")
 
-        await sio.emit("REGISTRY:status", [res[0], res[1]])
-
-    return
+        await sio.emit("REGISTRY:edit:status", [res[0], res[1]])

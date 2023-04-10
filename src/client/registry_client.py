@@ -215,7 +215,7 @@ class Registry_UI(Canvas):
 
         self.sio.emit("REGISTRY:edit", msg_bytes)
 
-        @self.sio.on("REGISTRY:status")
+        @self.sio.on("REGISTRY:edit:status")
         def on_status(data):
             [self.res1, self.res2] = data
 

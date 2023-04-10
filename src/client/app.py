@@ -64,12 +64,11 @@ class ClientApp:
         return
 
     def shutdown_logout(self):
-        self.sio.emit("SD_LO:start")
         sl.shutdown_logout(self.sio, self.root)
         return
 
     def mac_address(self):
-        self.sio.emit("MAC:start")
+        self.sio.emit("MAC:info")
         mac.mac_address(self.sio)
         return
 
@@ -80,13 +79,11 @@ class ClientApp:
         self.sio.emit("QUIT")
 
     def directory_tree(self):
-        self.sio.emit("DIRECTORY:start")
         tmp = dt.DirectoryTree_UI(self.root, self.sio)
         tmp.button_6.configure(command=lambda: self.back_dirTree(tmp))
         return
 
     def app_process(self):
-        self.sio.emit("APP_PRO:start")
         tmp = ap.App_Process_UI(self.root, self.sio)
         tmp.button_6.configure(command=lambda: self.back(tmp))
         return
@@ -104,7 +101,6 @@ class ClientApp:
         return
 
     def registry(self):
-        self.sio.emit("REGISTRY:start")
         tmp = rc.Registry_UI(self.root, self.sio)
         tmp.btn_back.configure(command=lambda: self.back_reg(tmp))
         return

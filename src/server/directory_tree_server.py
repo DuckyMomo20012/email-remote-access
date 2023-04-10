@@ -47,7 +47,6 @@ def copyFileToServer(metadata, data):
     filesize = int(filesize)
     try:
         with open(path + filename, "wb") as f:
-            print("data", data)
             f.write(data)
         return True
     except Exception:
@@ -60,17 +59,16 @@ def copyFileToClient(filename):
         return [False, None]
     with open(filename, "rb") as f:
         data = f.read()
-        print("data", data)
         return [True, data]
 
 
-def directory(sio: socketio.AsyncServer):
+def callbacks(sio: socketio.AsyncServer):
     @sio.on("DIRECTORY:show_tree")
-    async def show(sid):
+    async def on_show_tree(sid):
         await sio.emit("DIRECTORY:show_tree:data", showTree())
 
     @sio.on("DIRECTORY:list_dirs")
-    async def list_dirs(sid, data):
+    async def on_list_dirs(sid, data):
         [status, dirs] = listDirs(data)
 
         if status:
@@ -79,7 +77,7 @@ def directory(sio: socketio.AsyncServer):
             await sio.emit("DIRECTORY:list_dirs:error")
 
     @sio.on("DIRECTORY:copyto")
-    async def copyto(sid, data):
+    async def on_dir_copyto(sid, data):
         copyFileStatus = copyFileToServer(data["metadata"], data["data"])
         if copyFileStatus:
             await sio.emit("DIRECTORY:copyto:status", "OK")
@@ -87,7 +85,7 @@ def directory(sio: socketio.AsyncServer):
             await sio.emit("DIRECTORY:copyto:status", "NOT OK")
 
     @sio.on("DIRECTORY:copy")
-    async def copy(sid, data):
+    async def on_dir_copy(sid, data):
         [status, fileData] = copyFileToClient(data)
         if status:
             await sio.emit(
@@ -98,7 +96,7 @@ def directory(sio: socketio.AsyncServer):
             await sio.emit("DIRECTORY:copy:error")
 
     @sio.on("DIRECTORY:delete")
-    async def delete(sid, data):
+    async def on_dir_delete(sid, data):
         delStatus = delFile(data)
         if delStatus:
             await sio.emit("DIRECTORY:delete:status", "OK")
