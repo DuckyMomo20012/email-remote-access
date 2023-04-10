@@ -47,7 +47,6 @@ def copyFileToServer(metadata, data):
     filesize = int(filesize)
     try:
         with open(path + filename, "wb") as f:
-            print("data", data)
             f.write(data)
         return True
     except Exception:
@@ -60,7 +59,6 @@ def copyFileToClient(filename):
         return [False, None]
     with open(filename, "rb") as f:
         data = f.read()
-        print("data", data)
         return [True, data]
 
 
