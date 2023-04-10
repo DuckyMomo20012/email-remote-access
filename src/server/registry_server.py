@@ -5,8 +5,6 @@ import winreg
 
 import socketio
 
-from src.client.live_screen_client import BUFSIZ
-
 
 def parse_data(full_path):
     try:
@@ -164,8 +162,6 @@ def delete_key(full_path):
 
 
 def registry(sio: socketio.AsyncServer):
-    BUFSIZ = 32768
-
     # @sio.on("REGISTRY:stop")
     # def stop_edit_registry():
     #     sio.disconnect()

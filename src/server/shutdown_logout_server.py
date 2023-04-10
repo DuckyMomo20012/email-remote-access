@@ -2,8 +2,6 @@ import os
 
 import socketio
 
-BUFSIZ = 1024 * 4
-
 
 def shutdown_logout(sio: socketio.AsyncServer):
     @sio.on("SD_LO:shutdown")

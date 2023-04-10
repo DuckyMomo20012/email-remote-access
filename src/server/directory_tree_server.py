@@ -1,11 +1,7 @@
 import os
-import pickle
 
 import socketio
 
-from src.client.directory_tree_client import BUFFER_SIZE
-
-BUFSIZ = 1024 * 4
 SEPARATOR = "<SEPARATOR>"
 
 

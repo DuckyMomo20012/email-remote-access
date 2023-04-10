@@ -2,8 +2,6 @@ import tkinter as tk
 
 import socketio
 
-BUFSIZ = 1024 * 4
-
 
 def mac_address(sio: socketio.Client):
     @sio.on("MAC:info")

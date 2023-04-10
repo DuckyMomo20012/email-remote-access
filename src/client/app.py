@@ -1,4 +1,3 @@
-import socket
 import tkinter as tk
 
 import socketio
@@ -13,8 +12,6 @@ import src.client.main_ui as ui2
 import src.client.registry_client as rc
 import src.client.shutdown_logout_client as sl
 from src.server.server import PORT
-
-BUFSIZ = 1024 * 4
 
 
 class ClientApp:

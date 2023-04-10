@@ -3,11 +3,8 @@ import json
 # Tkinter
 import tkinter as tk
 from tkinter import Canvas, filedialog
-from tkinter.filedialog import asksaveasfile
 
 import socketio
-
-BUFSIZ = 32768
 
 
 class Registry_UI(Canvas):

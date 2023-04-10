@@ -1,9 +1,5 @@
 # Socket
 import io
-import socket
-
-# Thread
-from threading import Thread
 
 import socketio
 
@@ -12,7 +8,6 @@ from PIL import ImageGrab
 
 
 async def capture_screen(sio: socketio.AsyncServer):
-    INFO_SZ = 100
     isStreaming = True
 
     @sio.on("LIVESCREEN:stop")

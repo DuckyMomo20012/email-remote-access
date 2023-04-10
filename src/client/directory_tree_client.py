@@ -1,5 +1,4 @@
 import os
-import pickle
 import sys
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -8,7 +7,6 @@ from tkinter import Button, Canvas, PhotoImage, Text, filedialog, messagebox
 import socketio
 
 SEPARATOR = "<SEPARATOR>"
-BUFFER_SIZE = 4096
 
 
 def abs_path(file_name):

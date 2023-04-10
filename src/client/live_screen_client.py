@@ -1,6 +1,5 @@
 # Socket
 import io
-import socket
 
 # Tkinter
 import tkinter as tk
@@ -14,8 +13,6 @@ import socketio
 
 # Image
 from PIL import Image, ImageTk
-
-BUFSIZ = 1024 * 4
 
 
 class Desktop_UI(Canvas):

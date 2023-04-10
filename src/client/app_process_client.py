@@ -1,13 +1,10 @@
 import os
-import pickle
 import struct
 import sys
 import tkinter as tk
 from tkinter import Button, Canvas, PhotoImage, ttk
 
 import socketio
-
-BUFSIZ = 1024 * 4
 
 
 def abs_path(file_name):

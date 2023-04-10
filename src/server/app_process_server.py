@@ -1,11 +1,8 @@
 import os
-import pickle
 import struct
 
 import psutil
 import socketio
-
-BUFSIZ = 1024 * 4
 
 
 def send_data(client, data):
