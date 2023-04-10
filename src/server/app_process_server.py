@@ -89,25 +89,23 @@ def start(name):
     return
 
 
-def app_process(sio: socketio.AsyncServer):
-    @sio.on("APP_PRO:kill_proc")
-    async def kill_proc(sid, data):
+def callbacks(sio: socketio.AsyncServer):
+    @sio.on("APP_PRO:kill")
+    async def on_proc_kill(sid, data):
         res = kill(data)
-        await sio.emit("APP_PRO:kill_proc:status", res)
+        await sio.emit("APP_PRO:kill:status", res)
 
-    @sio.on("APP_PRO:list_proc:proc")
-    async def list_proc(sid):
+    @sio.on("APP_PRO:list")
+    async def on_proc_list(sid):
         ls1, ls2, ls3 = list_processes()
-        await sio.emit("APP_PRO:list_proc:status", [ls1, ls2, ls3])
+        await sio.emit("APP_PRO:list:status", [ls1, ls2, ls3])
 
-    @sio.on("APP_PRO:list_proc:app")
-    async def list_app(sid):
+    @sio.on("APP_PRO:list:app")
+    async def on_app_list(sid):
         ls1, ls2, ls3 = list_apps()
-        await sio.emit("APP_PRO:list_proc:status", [ls1, ls2, ls3])
+        await sio.emit("APP_PRO:list:status", [ls1, ls2, ls3])
 
-    @sio.on("APP_PRO:start_proc")
-    async def start_proc(sid, data):
+    @sio.on("APP_PRO:start")
+    async def on_proc_start(sid, data):
         res = start(data)
-        await sio.emit("APP_PRO:start_proc:status", res)
-
-    return
+        await sio.emit("APP_PRO:start:status", res)
