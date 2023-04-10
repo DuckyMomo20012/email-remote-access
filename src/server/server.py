@@ -12,11 +12,18 @@ import src.server.shutdown_logout_server as sl
 
 PORT = 5656
 
-app = FastAPI()
+# Use this to register FastAPI routes
+api = FastAPI()
 
+# Use this to register Socket.IO events
 sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*", logger=True)
 
-app = socketio.ASGIApp(sio)
+app = socketio.ASGIApp(sio, api)
+
+
+# @api.get("/")
+# async def index():
+#     return "Hello World"
 
 
 @sio.on("KEYLOG:start")
