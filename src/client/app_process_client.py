@@ -73,7 +73,6 @@ def send_start(sio: socketio.Client, pname):
 
 
 def start(root, sio: socketio.Client):
-    global pname
     pstart = tk.Toplevel(root)
     pstart["bg"] = "plum1"
     pstart.geometry("410x40")
@@ -95,7 +94,6 @@ def start(root, sio: socketio.Client):
 
 
 def kill(root, sio: socketio.Client):
-    global pid
     kill = tk.Toplevel(root)
     kill["bg"] = "plum1"
     kill.geometry("410x40")

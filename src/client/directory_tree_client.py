@@ -3,6 +3,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import Button, Canvas, PhotoImage, Text, filedialog, messagebox
+from typing import Dict
 
 import socketio
 
@@ -26,7 +27,7 @@ class DirectoryTree_UI(Canvas):
         Canvas.__init__(self, parent)
         self.sio = sio
         self.currPath = " "
-        self.nodes = dict()
+        self.nodes: Dict[str, str] = dict()
 
         self.configure(
             # window,
@@ -51,20 +52,25 @@ class DirectoryTree_UI(Canvas):
 
         ysb = ttk.Scrollbar(self.frame, orient="vertical", command=self.tree.yview)
         xsb = ttk.Scrollbar(self.frame, orient="horizontal", command=self.tree.xview)
-        self.tree.configure(yscroll=ysb.set, xscroll=xsb.set)
+        self.tree.configure(yscrollcommand=ysb.set, xscrollcommand=xsb.set)
         self.tree.heading("#0", text="Server's Directory Tree", anchor="w")
         self.tree.pack(fill=tk.BOTH)
 
         self.tree.bind("<<TreeviewOpen>>", self.open_node)
         self.tree.bind("<<TreeviewSelect>>", self.select_node)
 
-        self.insText2 = "Selected path.\n\
-            Click SEND FILE TO FOLDER button to select a file you want to copy to this folder.\n\
-            Click COPY THIS FILE to copy the selected file to your computer (client)\n\
-            Click DELETE button to delete the file on this path.\nYou can click SHOW button again to see the changes."
+        self.insText2 = (
+            "Selected path.\n"
+            "Click SEND FILE TO FOLDER button to select a file you want to copy to"
+            "this folder.\n"
+            "Click COPY THIS FILE to copy the selected file to your computer"
+            "(client)\n"
+            "Click DELETE button to delete the file on this path.\nYou can click SHOW"
+            "button again to see the changes."
+        )
         self.label2 = tk.Label(self.frame, text=self.insText2)
         self.label2.pack(fill=tk.X)
-        self.path = Text(self.frame, height=1, width=26, state="disable")
+        self.path = Text(self.frame, height=1, width=26, state="disabled")
         self.path.pack(fill=tk.X)
         self.button_2 = Button(
             self,
@@ -150,7 +156,7 @@ class DirectoryTree_UI(Canvas):
             self.tree.delete(self.tree.get_children(node))
             try:
                 self.listDirs(node, abspath)
-            except:
+            except Exception:
                 messagebox.showerror(message="Cannot open this directory!")
 
     def select_node(self, event):
@@ -165,13 +171,13 @@ class DirectoryTree_UI(Canvas):
         self.path.config(state="normal")
         self.path.delete("1.0", tk.END)
         self.path.insert(tk.END, self.currPath)
-        self.path.config(state="disable")
+        self.path.config(state="disabled")
 
     def deleteTree(self):
         self.currPath = " "
         self.path.config(state="normal")
         self.path.delete("1.0", tk.END)
-        self.path.config(state="disable")
+        self.path.config(state="disabled")
         for i in self.tree.get_children():
             self.tree.delete(i)
 
@@ -185,7 +191,7 @@ class DirectoryTree_UI(Canvas):
                 try:
                     abspath = os.path.abspath(path)
                     self.insert_node("", abspath, abspath, True)
-                except:
+                except Exception:
                     continue
 
     def listDirs(self, node, path):
@@ -205,7 +211,7 @@ class DirectoryTree_UI(Canvas):
         filename = filedialog.askopenfilename(
             title="Select File", filetypes=[("All Files", "*.*")]
         )
-        if filename == None or filename == "":
+        if filename is None or filename == "":
             return
         destPath = self.currPath + "\\"
         filesize = os.path.getsize(filename)
@@ -227,7 +233,7 @@ class DirectoryTree_UI(Canvas):
     # copy file from server to client
     def copyFileToClient(self):
         destPath = filedialog.askdirectory()
-        if destPath == None or destPath == "":
+        if destPath is None or destPath == "":
             return
 
         self.sio.emit(

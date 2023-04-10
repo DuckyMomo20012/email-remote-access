@@ -17,7 +17,8 @@ def list_apps():
     ls2 = list()
     ls3 = list()
 
-    cmd = "powershell \"gps | where {$_.mainWindowTitle} | select Description, ID, @{Name='ThreadCount';Expression ={$_.Threads.Count}}"
+    cmd = "powershell \"gps | where {$_.mainWindowTitle} \
+        | select Description, ID, @{Name='ThreadCount';Expression ={$_.Threads.Count}}"
     proc = os.popen(cmd).read().split("\n")
     tmp = list()
     for line in proc:
@@ -48,7 +49,7 @@ def list_apps():
             ls1.append(name)
             ls2.append(ID)
             ls3.append(threads)
-        except:
+        except Exception:
             pass
     return ls1, ls2, ls3
 
@@ -79,7 +80,7 @@ def kill(pid):
             return 1
         else:
             return 0
-    except:
+    except Exception:
         return 0
 
 

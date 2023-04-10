@@ -25,7 +25,7 @@ def listDirs(path):
             listT.append((d, os.path.isdir(path + "\\" + d)))
 
         return [True, listT]
-    except:
+    except Exception:
         return [False, None]
 
 
@@ -34,7 +34,7 @@ def delFile(path):
         try:
             os.remove(path)
             return True
-        except:
+        except Exception:
             return False
     else:
         return False
@@ -50,7 +50,7 @@ def copyFileToServer(metadata, data):
             print("data", data)
             f.write(data)
         return True
-    except:
+    except Exception:
         return False
 
 

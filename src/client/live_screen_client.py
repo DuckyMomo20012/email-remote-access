@@ -85,11 +85,11 @@ class Desktop_UI(Canvas):
         self.sio.emit("LIVESCREEN:start")
 
     def save_img(self):
-        if self.frame == None:
+        if self.frame is None:
             return
 
         types = [("Portable Network Graphics", "*.png"), ("All Files", "*.*")]
         img_file = asksaveasfile(mode="wb", filetypes=types, defaultextension="*.png")
-        if img_file == None:
+        if img_file is None:
             return
         img_file.write(self.frame)

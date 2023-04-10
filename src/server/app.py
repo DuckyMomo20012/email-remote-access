@@ -35,7 +35,7 @@ class ServerApp:
                 child.kill()
 
             self.proc.terminate()
-        except:
+        except Exception:
             pass
 
     def start(self):
