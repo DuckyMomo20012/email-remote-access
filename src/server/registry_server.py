@@ -5,8 +5,6 @@ import winreg
 
 import socketio
 
-from src.client.live_screen_client import BUFSIZ
-
 
 def parse_data(full_path):
     try:
@@ -27,7 +25,7 @@ def parse_data(full_path):
         reg_key = re.sub(r"\\[^\\]+$", "", reg_key)
         reg_value = re.sub(r"^.*\\", "", full_path)
         return hive, reg_key, reg_value
-    except:
+    except Exception:
         return None, None, None
 
 
@@ -40,7 +38,7 @@ def query_value(full_path):
         winreg.QueryValueEx(opened_key, value_list[2])
         winreg.CloseKey(opened_key)
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -53,7 +51,7 @@ def get_value(full_path):
         value_of_value, value_type = winreg.QueryValueEx(opened_key, value_list[2])
         winreg.CloseKey(opened_key)
         return ["1", value_of_value]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -109,7 +107,7 @@ def set_value(full_path, value, value_type):
         )
         winreg.CloseKey(opened_key)
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -122,7 +120,7 @@ def delete_value(full_path):
         winreg.DeleteValue(opened_key, value_list[2])
         winreg.CloseKey(opened_key)
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -137,7 +135,7 @@ def query_key(full_path):
         )
         winreg.CloseKey(opened_key)
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -148,7 +146,7 @@ def create_key(full_path):
             getattr(winreg, value_list[0]), value_list[1] + r"\\" + value_list[2]
         )
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
@@ -159,13 +157,11 @@ def delete_key(full_path):
             getattr(winreg, value_list[0]), value_list[1] + r"\\" + value_list[2]
         )
         return ["1", "1"]
-    except:
+    except Exception:
         return ["0", "0"]
 
 
 def registry(sio: socketio.AsyncServer):
-    BUFSIZ = 32768
-
     # @sio.on("REGISTRY:stop")
     # def stop_edit_registry():
     #     sio.disconnect()
@@ -198,7 +194,7 @@ def registry(sio: socketio.AsyncServer):
                 os.system(r"regedit /s " + os.getcwd() + "\\run.reg")
                 res = ["1", "1"]
                 print("file reg created")
-            except:
+            except Exception:
                 res = ["0", "0"]
                 print("cannot create file reg")
 

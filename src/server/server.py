@@ -10,7 +10,6 @@ import src.server.mac_address_server as mac
 import src.server.registry_server as rs
 import src.server.shutdown_logout_server as sl
 
-BUFSIZ = 1024 * 4
 PORT = 5656
 
 app = FastAPI()

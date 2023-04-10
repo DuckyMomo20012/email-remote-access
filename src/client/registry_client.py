@@ -3,11 +3,8 @@ import json
 # Tkinter
 import tkinter as tk
 from tkinter import Canvas, filedialog
-from tkinter.filedialog import asksaveasfile
 
 import socketio
-
-BUFSIZ = 32768
 
 
 class Registry_UI(Canvas):
@@ -37,14 +34,18 @@ class Registry_UI(Canvas):
         # initialize status ready to use
         self.status = True
 
-        ##########Tkinter widgets############################
+        ######################################
+        # Tkinter widgets
         # KEY
         self.key_label = tk.Label(self, text="Key", relief="flat")
         self.key_label.place(x=50, y=50, width=90, height=25)
         self.key_txt = tk.Text(self)
         self.key_txt.place(x=150, y=50, width=300, height=25)
         self.ex1 = tk.Label(
-            self, text="Ex: HKEY_CURRENT_USER\SOFTWARE\MyKey", anchor="w", bg="#FCD0E8"
+            self,
+            text="Ex: HKEY_CURRENT_USER\\SOFTWARE\\MyKey",
+            anchor="w",
+            bg="#FCD0E8",
         )
         self.ex1.place(x=150, y=85, width=300, height=25)
 
@@ -95,7 +96,9 @@ class Registry_UI(Canvas):
         """
         self.data_type_lst = tk.StringVar(self)
         self.data_type_lst.set("Value type")
-        self.data_type = tk.OptionMenu(self, self.data_type_lst, "String", "Binary", "DWORD", "QWORD", "Multi-String", "Expandable String", command = self.change_value_type)
+        self.data_type = tk.OptionMenu(self, self.data_type_lst, "String",
+        "Binary", "DWORD", "QWORD", "Multi-String", "Expandable String", command
+        = self.change_value_type)
         self.data_type.grid(row = 5, column = 2, columnspan = 2)
         self.data_type.config(width = 20)
         """
@@ -158,7 +161,7 @@ class Registry_UI(Canvas):
                 self.data_type = dtypes[t_num]
             else:
                 self.data_type = dtypes[0]
-        except:
+        except Exception:
             self.data_type = dtypes[0]
 
     def get_value(self):
@@ -190,7 +193,7 @@ class Registry_UI(Canvas):
 
     def open_file(self):
         file = filedialog.askopenfilename()
-        if file == None or file == "":
+        if file is None or file == "":
             return
         self.content.delete("1.0", "end")
         s = ""

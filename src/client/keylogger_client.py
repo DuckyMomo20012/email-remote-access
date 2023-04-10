@@ -79,7 +79,7 @@ class Keylogger_UI(Canvas):
             self,
             height=200,
             width=500,
-            state="disable",
+            state="disabled",
             wrap="char",
             bd=0,
             bg="white",

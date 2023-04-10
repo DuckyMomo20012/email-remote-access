@@ -1,13 +1,9 @@
 import os
-import pickle
-import struct
 import sys
 import tkinter as tk
 from tkinter import Button, Canvas, PhotoImage, ttk
 
 import socketio
-
-BUFSIZ = 1024 * 4
 
 
 def abs_path(file_name):
@@ -20,23 +16,6 @@ def abs_path(file_name):
         base_path = os.path.abspath(".")
 
     return os.path.join(base_path, file_name)
-
-
-def recvall(sock, size):
-    message = bytearray()
-    while len(message) < size:
-        buffer = sock.recv(size - len(message))
-        if not buffer:
-            raise EOFError("Could not receive all expected data!")
-        message.extend(buffer)
-    return bytes(message)
-
-
-def receive(client):
-    packed = recvall(client, struct.calcsize("!I"))
-    size = struct.unpack("!I", packed)[0]
-    data = recvall(client, size)
-    return data
 
 
 def switch(btn, tab):
@@ -94,7 +73,6 @@ def send_start(sio: socketio.Client, pname):
 
 
 def start(root, sio: socketio.Client):
-    global pname
     pstart = tk.Toplevel(root)
     pstart["bg"] = "plum1"
     pstart.geometry("410x40")
@@ -116,7 +94,6 @@ def start(root, sio: socketio.Client):
 
 
 def kill(root, sio: socketio.Client):
-    global pid
     kill = tk.Toplevel(root)
     kill["bg"] = "plum1"
     kill.geometry("410x40")
