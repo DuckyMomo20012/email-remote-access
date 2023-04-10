@@ -5,7 +5,7 @@ description = "Control remote computers using email"
 authors = ["Duong Vinh <tienvinh.duong4@gmail.com>"]
 
 [tool.poe.tasks]
-dev = "python app.py"
+dev = "python cli.py"
 lint = "flake8"
 "sort_import" = "isort ."
 pretty = "black ."
