@@ -3,7 +3,7 @@ from enum import Enum
 import typer
 from environs import Env
 
-import src.client.client as client
+import src.client.app as clientApp
 import src.server.app as serverApp
 
 TService = Enum("Service", {k: k for k in ["server", "client"]})  # type: ignore
@@ -17,7 +17,7 @@ def main(service: TService = typer.Argument("server", help="Service to run")):
     if str(service) == "Service.server":
         serverApp.main()
     elif str(service) == "Service.client":
-        client.main()
+        clientApp.main()
 
 
 if __name__ == "__main__":
