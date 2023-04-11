@@ -11,6 +11,7 @@ lint = "flake8"
 pretty = "black ."
 test = "echo You are running test command"
 deploy = "echo You are running deploy command"
+"demo" = "python demo.py"
 
 [tool.isort]
 profile = "black"
