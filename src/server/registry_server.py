@@ -167,7 +167,7 @@ def callbacks(sio: socketio.AsyncServer):
     #     sio.disconnect()
 
     @sio.on("REGISTRY:edit")
-    async def on_registry_edit(sid, data):
+    def on_registry_edit(sid, data):
         msg = json.loads(data.decode("utf8"))
         # extract elements
         ID = msg["ID"]
@@ -210,4 +210,4 @@ def callbacks(sio: socketio.AsyncServer):
         elif ID == 4:
             res = delete_key(full_path + r"\\")
 
-        await sio.emit("REGISTRY:edit:status", [res[0], res[1]])
+        return [res[0], res[1]]

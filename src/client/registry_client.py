@@ -2,7 +2,8 @@ import json
 
 # Tkinter
 import tkinter as tk
-from tkinter import Canvas, filedialog
+from tkinter import Canvas, filedialog, messagebox
+from typing import Optional
 
 import socketio
 
@@ -29,8 +30,8 @@ class Registry_UI(Canvas):
         self.data = None
         self.data_type = 1
         # attributes for response of action
-        self.res1 = None
-        self.res2 = None
+        self.res1: Optional[str] = None
+        self.res2: Optional[str] = None
         # initialize status ready to use
         self.status = True
 
@@ -213,26 +214,25 @@ class Registry_UI(Canvas):
         msg = json.dumps(msg)
         msg_bytes = bytes(msg, "utf8")
 
-        self.sio.emit("REGISTRY:edit", msg_bytes)
-
-        @self.sio.on("REGISTRY:edit:status")
-        def on_status(data):
+        def handleMessage(data: tuple[str, str]):
             [self.res1, self.res2] = data
 
             if self.action_ID == 1:
                 if "0" in self.res1:
-                    tk.messagebox.showerror(
+                    messagebox.showerror(
                         title="Thông báo", message="Thao tác không hợp lệ"
                     )
                 else:
-                    tk.messagebox.showinfo(title="Thông báo", message=self.res2)
+                    messagebox.showinfo(title="Thông báo", message=self.res2)
             else:
                 if "0" in self.res1:
-                    tk.messagebox.showerror(
+                    messagebox.showerror(
                         title="Thông báo", message="Thao tác không hợp lệ"
                     )
                 else:
-                    tk.messagebox.showinfo(title="Thông báo", message="Thành công")
+                    messagebox.showinfo(title="Thông báo", message="Thành công")
+
+        self.sio.emit("REGISTRY:edit", msg_bytes, callback=handleMessage)
 
     def click_back(self):
         self.status = False
