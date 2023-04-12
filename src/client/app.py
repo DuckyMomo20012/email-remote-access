@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 import socketio
 
@@ -43,13 +44,13 @@ class ClientApp:
     def callbacks(self):
         @self.sio.event
         def connect():
-            tk.messagebox.showinfo(message="Connect successfully!")
+            messagebox.showinfo(message="Connect successfully!")
 
             self.show_main_ui()
 
         @self.sio.event
         def connect_error(data):
-            tk.messagebox.showerror(message="Cannot connect!")
+            messagebox.showerror(message="Cannot connect!")
 
     def back(self, ui):
         ui.place_forget()
