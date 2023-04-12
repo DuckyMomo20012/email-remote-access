@@ -3,7 +3,7 @@ import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import Button, Canvas, PhotoImage, Text, filedialog, messagebox
-from typing import Dict
+from typing import Dict, Literal, Union
 
 import socketio
 
@@ -183,10 +183,8 @@ class DirectoryTree_UI(Canvas):
 
     def showTree(self):
         self.deleteTree()
-        self.sio.emit("DIRECTORY:show_tree")
 
-        @self.sio.on("DIRECTORY:show_tree:data")
-        def showTreeData(data):
+        def handleMessage(data: list):
             for path in data:
                 try:
                     abspath = os.path.abspath(path)
@@ -194,17 +192,18 @@ class DirectoryTree_UI(Canvas):
                 except Exception:
                     continue
 
-    def listDirs(self, node, path):
-        self.sio.emit("DIRECTORY:list_dirs", path)
+        self.sio.emit("DIRECTORY:show_tree", "", callback=handleMessage)
 
-        @self.sio.on("DIRECTORY:list_dirs:data")
-        def listDirsData(data):
+    def listDirs(self, node, path: str):
+        def handleMessage(data: Union[list, dict]):
+            if isinstance(data, dict) and "msg" in data:
+                messagebox.showerror(message=data["msg"])
+                return
+
             for p in data:
                 self.insert_node(node, p[0], os.path.join(path, p[0]), p[1])
 
-        @self.sio.on("DIRECTORY:list_dirs:error")
-        def listDirsError():
-            messagebox.showerror(message="Cannot open this directory!")
+        self.sio.emit("DIRECTORY:list_dirs", path, callback=handleMessage)
 
     # copy file from client to server
     def copyFileToServer(self):
@@ -215,20 +214,21 @@ class DirectoryTree_UI(Canvas):
             return
         destPath = self.currPath + "\\"
         filesize = os.path.getsize(filename)
+
+        def handleMessage(status: Literal["OK", "NOT OK"]):
+            if status == "OK":
+                messagebox.showinfo(message="Copy file successfully!")
+            else:
+                messagebox.showerror(message="Cannot copy file!")
+
         self.sio.emit(
             "DIRECTORY:copyto",
             {
                 "metadata": f"{filename}{SEPARATOR}{filesize}{SEPARATOR}{destPath}",
                 "data": open(filename, "rb").read(),
             },
+            callback=handleMessage,
         )
-
-        @self.sio.on("DIRECTORY:copyto:status")
-        def copyFileToServerStatus(data):
-            if data == "OK":
-                messagebox.showinfo(message="Copy file successfully!")
-            else:
-                messagebox.showerror(message="Cannot copy file!")
 
     # copy file from server to client
     def copyFileToClient(self):
@@ -236,31 +236,30 @@ class DirectoryTree_UI(Canvas):
         if destPath is None or destPath == "":
             return
 
-        self.sio.emit(
-            "DIRECTORY:copy",
-            self.currPath,
-        )
+        def handleMessage(data: dict):
+            if isinstance(data, dict) and "msg" in data:
+                messagebox.showerror(message=data["msg"])
+                return
 
-        @self.sio.on("DIRECTORY:copy:data")
-        def copyFileToClientData(data):
             with open(os.path.abspath(destPath) + "\\" + data["filename"], "wb") as f:
                 f.write(data["fileData"])
 
             messagebox.showinfo(message="Copy file successfully!")
 
-        @self.sio.on("DIRECTORY:copy:error")
-        def copyFileToClientError():
-            messagebox.showerror(message="Cannot copy file!")
+        self.sio.emit(
+            "DIRECTORY:copy",
+            self.currPath,
+            callback=handleMessage,
+        )
 
     def deleteFile(self):
-        self.sio.emit("DIRECTORY:delete", self.currPath)
-
-        @self.sio.on("DIRECTORY:delete:status")
-        def deleteFileStatus(data):
-            if data == "OK":
+        def handleMessage(status: Literal["OK", "NOT OK"]):
+            if status == "OK":
                 messagebox.showinfo(message="Delete file successfully!")
             else:
                 messagebox.showerror(message="Cannot delete file!")
+
+        self.sio.emit("DIRECTORY:delete", self.currPath, callback=handleMessage)
 
     def back(self):
         return

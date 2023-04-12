@@ -10,11 +10,11 @@ def close_event(main: tk.Toplevel, sio: socketio.Client):
 
 
 def shutdown(sio: socketio.Client):
-    sio.emit("SD_LO:shutdown")
+    sio.emit("SD_LO:shutdown", "")
 
 
 def logout(sio: socketio.Client):
-    sio.emit("SD_LO:logout")
+    sio.emit("SD_LO:logout", "")
 
 
 def shutdown_logout(sio: socketio.Client, root: tk.Tk):

@@ -1,15 +1,7 @@
 import os
-import struct
 
 import psutil
 import socketio
-
-
-def send_data(client, data):
-    size = struct.pack("!I", len(data))
-    data = size + data
-    client.sendall(data)
-    return
 
 
 def list_apps():
@@ -72,7 +64,7 @@ def list_processes():
     return ls1, ls2, ls3
 
 
-def kill(pid):
+def kill(pid: str):
     cmd = "taskkill.exe /F /PID " + str(pid)
     try:
         a = os.system(cmd)
@@ -91,21 +83,25 @@ def start(name):
 
 def callbacks(sio: socketio.AsyncServer):
     @sio.on("APP_PRO:kill")
-    async def on_proc_kill(sid, data):
-        res = kill(data)
-        await sio.emit("APP_PRO:kill:status", res)
+    def on_proc_kill(sid, pid: str):
+        status = kill(pid)
+
+        return status
 
     @sio.on("APP_PRO:list")
-    async def on_proc_list(sid):
+    def on_proc_list(sid, data):
         ls1, ls2, ls3 = list_processes()
-        await sio.emit("APP_PRO:list:data", [ls1, ls2, ls3])
+
+        return [ls1, ls2, ls3]
 
     @sio.on("APP_PRO:list:app")
-    async def on_app_list(sid):
+    async def on_app_list(sid, data):
         ls1, ls2, ls3 = list_apps()
-        await sio.emit("APP_PRO:list:data", [ls1, ls2, ls3])
+
+        return [ls1, ls2, ls3]
 
     @sio.on("APP_PRO:start")
-    async def on_proc_start(sid, data):
-        res = start(data)
-        await sio.emit("APP_PRO:start:status", res)
+    async def on_proc_start(sid, name: str):
+        status = start(name)
+
+        return status

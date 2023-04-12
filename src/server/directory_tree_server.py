@@ -15,7 +15,7 @@ def showTree():
     return listD
 
 
-def listDirs(path):
+def listDirs(path: str):
     if not os.path.isdir(path):
         return [False, path]
 
@@ -30,7 +30,7 @@ def listDirs(path):
         return [False, None]
 
 
-def delFile(path):
+def delFile(path: str):
     if os.path.exists(path):
         try:
             os.remove(path)
@@ -42,10 +42,9 @@ def delFile(path):
 
 
 # copy file from client to server
-def copyFileToServer(metadata, data):
+def copyFileToServer(metadata: str, data: bytes):
     [filename, filesize, path] = metadata.split(SEPARATOR)
     filename = os.path.basename(filename)
-    filesize = int(filesize)
     try:
         with open(path + filename, "wb") as f:
             f.write(data)
@@ -65,52 +64,48 @@ def copyFileToClient(filename):
 
 def callbacks(sio: socketio.AsyncServer):
     @sio.on("DIRECTORY:show_tree")
-    async def on_show_tree(sid):
-        await sio.emit("DIRECTORY:show_tree:data", showTree())
+    def on_show_tree(sid, data):
+        return showTree()
 
     @sio.on("DIRECTORY:list_dirs")
-    async def on_list_dirs(sid, data):
-        [status, dirs] = listDirs(data)
+    def on_list_dirs(sid, path: str):
+        [status, dirs] = listDirs(path)
 
         if status:
-            await sio.emit("DIRECTORY:list_dirs:data", dirs)
+            return dirs
         else:
-            await sio.emit("DIRECTORY:list_dirs:error")
+            return {"msg": "Directory not found"}
 
     @sio.on("DIRECTORY:list_dirs:pretty")
-    async def on_list_dirs_pretty(sid, data):
+    async def on_list_dirs_pretty(sid, path: str):
         try:
             # NOTE: r is for raw string, to prevent invalid path
-            tree_dir = seedir.seedir(rf"{data}", printout=False, style="emoji")
-            await sio.emit("DIRECTORY:list_dirs:pretty:data", tree_dir)
+            tree_dir = seedir.seedir(rf"{path}", printout=False, style="emoji")
+
+            return tree_dir
         except PermissionError:
-            await sio.emit(
-                "DIRECTORY:list_dirs:pretty:error", {"msg": "Permission Denied"}
-            )
+            return {"msg": "Permission Denied"}
 
     @sio.on("DIRECTORY:copyto")
-    async def on_dir_copyto(sid, data):
+    def on_dir_copyto(sid, data: dict):
         copyFileStatus = copyFileToServer(data["metadata"], data["data"])
         if copyFileStatus:
-            await sio.emit("DIRECTORY:copyto:status", "OK")
+            return "OK"
         else:
-            await sio.emit("DIRECTORY:copyto:status", "NOT OK")
+            return "NOT OK"
 
     @sio.on("DIRECTORY:copy")
-    async def on_dir_copy(sid, data):
-        [status, fileData] = copyFileToClient(data)
+    def on_dir_copy(sid, filePath: str):
+        [status, fileData] = copyFileToClient(filePath)
         if status:
-            await sio.emit(
-                "DIRECTORY:copy:data",
-                {"filename": os.path.basename(data), "fileData": fileData},
-            )
+            return {"filename": os.path.basename(filePath), "fileData": fileData}
         else:
-            await sio.emit("DIRECTORY:copy:error")
+            return {"msg": "Cannot copy file"}
 
     @sio.on("DIRECTORY:delete")
-    async def on_dir_delete(sid, data):
-        delStatus = delFile(data)
+    def on_dir_delete(sid, filePath: str):
+        delStatus = delFile(filePath)
         if delStatus:
-            await sio.emit("DIRECTORY:delete:status", "OK")
+            return "OK"
         else:
-            await sio.emit("DIRECTORY:delete:status", "NOT OK")
+            return "NOT OK"

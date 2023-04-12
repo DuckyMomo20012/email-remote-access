@@ -9,11 +9,11 @@ from PIL import ImageGrab
 
 def callbacks(sio: socketio.AsyncServer):
     @sio.on("LIVESCREEN:start")
-    async def on_stream(sid):
+    async def on_stream(sid, data):
         isStreaming = True
 
         @sio.on("LIVESCREEN:stop")
-        def on_stream_stop(sid):
+        def on_stream_stop(sid, data):
             nonlocal isStreaming
             isStreaming = False
 
@@ -26,10 +26,10 @@ def callbacks(sio: socketio.AsyncServer):
             await sio.emit("LIVESCREEN:stream", data)
 
     @sio.on("LIVESCREEN:screenshot")
-    async def on_screenshot(sid):
+    def on_screenshot(sid, data):
         img = ImageGrab.grab()
         img_bytes = io.BytesIO()
         img.save(img_bytes, format="PNG")
-        data = img_bytes.getvalue()
+        img_content = img_bytes.getvalue()
 
-        await sio.emit("LIVESCREEN:screenshot:data", data)
+        return img_content

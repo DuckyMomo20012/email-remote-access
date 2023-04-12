@@ -61,28 +61,28 @@ class Desktop_UI(Canvas):
     # display frames continously
     def ChangeImage(self):
         @self.sio.on("LIVESCREEN:stream")
-        def stream(data):
+        def stream(data: bytes):
             img_PIL = Image.open(io.BytesIO(data)).resize((960, 540), Image.ANTIALIAS)
             img_tk = ImageTk.PhotoImage(img_PIL)
             self.label.configure(image=img_tk)
-            self.label.image = img_tk
+            self.label.image = img_tk  # type: ignore
 
             self.frame = data
 
     def click_back(self):
         self.status = False
 
-        self.sio.emit("LIVESCREEN:stop")
+        self.sio.emit("LIVESCREEN:stop", "")
 
         self.place_forget()
 
     def click_save(self):
         self.on_save = True
-        self.sio.emit("LIVESCREEN:stop")
+        self.sio.emit("LIVESCREEN:stop", "")
 
         self.save_img()
         self.on_save = False
-        self.sio.emit("LIVESCREEN:start")
+        self.sio.emit("LIVESCREEN:start", "")
 
     def save_img(self):
         if self.frame is None:

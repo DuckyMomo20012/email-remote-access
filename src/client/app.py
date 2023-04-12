@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 import socketio
 
@@ -43,13 +44,13 @@ class ClientApp:
     def callbacks(self):
         @self.sio.event
         def connect():
-            tk.messagebox.showinfo(message="Connect successfully!")
+            messagebox.showinfo(message="Connect successfully!")
 
             self.show_main_ui()
 
         @self.sio.event
         def connect_error(data):
-            tk.messagebox.showerror(message="Cannot connect!")
+            messagebox.showerror(message="Cannot connect!")
 
     def back(self, ui):
         ui.place_forget()
@@ -57,7 +58,7 @@ class ClientApp:
         self.sio.emit("QUIT")
 
     def live_screen(self):
-        self.sio.emit("LIVESCREEN:start")
+        self.sio.emit("LIVESCREEN:start", "")
         tmp = lsc.Desktop_UI(self.root, self.sio)
         if not tmp.status:
             self.back(tmp)
@@ -68,7 +69,6 @@ class ClientApp:
         return
 
     def mac_address(self):
-        self.sio.emit("MAC:info")
         mac.mac_address(self.sio)
         return
 

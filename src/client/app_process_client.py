@@ -1,7 +1,8 @@
 import os
 import sys
 import tkinter as tk
-from tkinter import Button, Canvas, PhotoImage, ttk
+from tkinter import Button, Canvas, PhotoImage, messagebox, ttk
+from typing import Literal
 
 import socketio
 
@@ -32,33 +33,31 @@ def switch(btn, tab):
     return
 
 
-def send_kill(sio: socketio.Client, pid):
-    sio.emit("APP_PRO:kill", pid)
-
-    @sio.on("APP_PRO:kill:status")
-    def on_message(data):
-        if data == 1:
-            tk.messagebox.showinfo(message="Đã diệt!")
+def send_kill(sio: socketio.Client, pid: str):
+    def handleMessage(status: Literal[0, 1]):
+        if status == 1:
+            messagebox.showinfo(message="Đã diệt!")
         else:
-            tk.messagebox.showerror(message="Lỗi!")
+            messagebox.showerror(message="Lỗi!")
+
+    sio.emit("APP_PRO:kill", pid, callback=handleMessage)
 
     return
 
 
-def _list(sio: socketio.Client, tab, s):
-    if s == "PROCESS":
-        sio.emit("APP_PRO:list")
-    elif s == "APPLICATION":
-        sio.emit("APP_PRO:list:app")
-
-    @sio.on("APP_PRO:list:data")
-    def on_message(data):
+def _list(sio: socketio.Client, tab, s: Literal["PROCESS", "APPLICATION"]):
+    def handleMessage(data: list[list]):
         ls1, ls2, ls3 = data
         for i in tab.get_children():
             tab.delete(i)
         for i in range(len(ls1)):
             tab.insert(parent="", index="end", text="", values=(ls1[i], ls2[i], ls3[i]))
         return
+
+    if s == "PROCESS":
+        sio.emit("APP_PRO:list", "", callback=handleMessage)
+    elif s == "APPLICATION":
+        sio.emit("APP_PRO:list:app", "", callback=handleMessage)
 
 
 def clear(tab):
@@ -67,7 +66,7 @@ def clear(tab):
     return
 
 
-def send_start(sio: socketio.Client, pname):
+def send_start(sio: socketio.Client, pname: str):
     sio.emit("APP_PRO:start", pname)
     return
 
