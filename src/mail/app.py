@@ -34,12 +34,12 @@ app = App()
 
 
 def main():
-    from src.mail.pages.index import IndexPage
+    from src.mail.pages.connect import ConnectPage
 
     dpg.create_context()
     dpg.create_viewport(title="Remote Control", width=1280, height=800)
 
-    app.goto(IndexPage())
+    app.goto(ConnectPage())
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
