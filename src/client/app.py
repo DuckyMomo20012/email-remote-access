@@ -58,7 +58,7 @@ class ClientApp:
         self.sio.emit("QUIT")
 
     def live_screen(self):
-        self.sio.emit("LIVESCREEN:start")
+        self.sio.emit("LIVESCREEN:start", "")
         tmp = lsc.Desktop_UI(self.root, self.sio)
         if not tmp.status:
             self.back(tmp)
