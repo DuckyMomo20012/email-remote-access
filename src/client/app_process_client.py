@@ -51,7 +51,7 @@ def _list(sio: socketio.Client, tab, s):
     elif s == "APPLICATION":
         sio.emit("APP_PRO:list:app")
 
-    @sio.on("APP_PRO:list:status")
+    @sio.on("APP_PRO:list:data")
     def on_message(data):
         ls1, ls2, ls3 = data
         for i in tab.get_children():
