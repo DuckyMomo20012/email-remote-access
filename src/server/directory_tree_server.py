@@ -1,5 +1,6 @@
 import os
 
+import seedir
 import socketio
 
 SEPARATOR = "<SEPARATOR>"
@@ -75,6 +76,17 @@ def callbacks(sio: socketio.AsyncServer):
             await sio.emit("DIRECTORY:list_dirs:data", dirs)
         else:
             await sio.emit("DIRECTORY:list_dirs:error")
+
+    @sio.on("DIRECTORY:list_dirs:pretty")
+    async def on_list_dirs_pretty(sid, data):
+        try:
+            # NOTE: r is for raw string, to prevent invalid path
+            tree_dir = seedir.seedir(rf"{data}", printout=False, style="emoji")
+            await sio.emit("DIRECTORY:list_dirs:pretty:data", tree_dir)
+        except PermissionError:
+            await sio.emit(
+                "DIRECTORY:list_dirs:pretty:error", {"msg": "Permission Denied"}
+            )
 
     @sio.on("DIRECTORY:copyto")
     async def on_dir_copyto(sid, data):

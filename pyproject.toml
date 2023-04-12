@@ -28,6 +28,7 @@ typer = "^0.7.0"
 python-socketio = {extras = ["client"], version = "^5.8.0"}
 fastapi = "^0.95.0"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
+seedir = {extras = ["emoji"], version = "^0.4.2"}
 
 [tool.poetry.group.dev.dependencies]
 poethepoet = "^0.18.1"
