@@ -69,7 +69,6 @@ class ClientApp:
         return
 
     def mac_address(self):
-        self.sio.emit("MAC:info")
         mac.mac_address(self.sio)
         return
 
