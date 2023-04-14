@@ -129,13 +129,19 @@ class IndexPage(BasePage):
     def runCmd(self, cmd: Command):
         pass
 
+    def handleRefreshClick(self):
+        self.getData()
+        self.reload(isPrimary=True)
+
     def render(self):
         with dpg.window(label="Mail Inbox", tag=self.tag, width=400, height=200):
             dpg.add_text("Inbox")
 
             with dpg.menu_bar():
                 with dpg.menu(label="Actions"):
-                    dpg.add_menu_item(label="Refresh", callback=self.getData)
+                    dpg.add_menu_item(
+                        label="Refresh", callback=lambda: self.handleRefreshClick()
+                    )
                     dpg.add_menu_item(
                         label="Exit", callback=lambda: dpg.stop_dearpygui()
                     )
