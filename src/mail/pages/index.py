@@ -126,7 +126,28 @@ class IndexPage(BasePage):
         mails = self.fetchMail(maxEntries=self.fetchMaxEntries)
         self.mails = [parseMail(mail) for mail in mails]
 
-    def runCmd(self, cmd: Command):
+    def runCmd(self, cmd: Command, toUser: str):
+        # TODO: Switch each command and send desired command to "toUser"
+        # NOTE: Use "self.service" to send email
+        # NOTE: Use "app.sio" to register socket.io event callback (emit
+        # events/listen for response)
+
+        # This will send a "foo" event to the server with "some_data" as the
+        # data and receive a response from the server. It's like req/res in a
+        # web server.
+        # E.g.:
+        # app.sio.emit("foo", "some_data", callback=lambda data: print(data))
+
+        # This will send a "foo" event to the server with "some_data" as the
+        # data and listen for a "bar" event from the server. It's quite like the
+        # above approach but it's more like a pub/sub model.
+        # E.g.:
+        # app.sio.emit("foo", "some_data")
+
+        # @app.sio.on("bar")
+        # def on_bar(data):
+        #     pass
+
         pass
 
     def handleRefreshClick(self):
@@ -163,7 +184,7 @@ class IndexPage(BasePage):
                                 # Sleep for 5 second to simulate running
                                 # time.sleep(5)
 
-                                self.runCmd(cmd)
+                                self.runCmd(cmd, mail["from"])
 
                                 dpg.configure_item(sender, label="Done")
 
