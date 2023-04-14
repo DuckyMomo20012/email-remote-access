@@ -12,5 +12,11 @@ class BasePage:
         else:
             self.tag = tag
 
+    def reload(self, isPrimary: bool = True):
+        dpg.delete_item(self.tag)
+        self.render()
+        if isPrimary:
+            dpg.set_primary_window(self.tag, True)
+
     def render(self):
         dpg.add_window(label="Base Page", tag=self.tag)
