@@ -41,6 +41,8 @@ Thumbs.db
 # Env Files
 .env
 .env*.local
+credentials.json
+token.json
 
 # Logs
 logs

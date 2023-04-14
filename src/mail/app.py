@@ -2,6 +2,7 @@ from typing import Union
 
 import dearpygui.dearpygui as dpg
 import socketio
+from google.oauth2.credentials import Credentials
 
 from src.mail.pages.base import BasePage
 
@@ -9,6 +10,7 @@ from src.mail.pages.base import BasePage
 class App:
     sio: socketio.Client
     histories: list[Union[int, str]]
+    creds: Credentials = None
 
     def __init__(self):
         self.sio = socketio.Client()
@@ -35,11 +37,12 @@ app = App()
 
 def main():
     from src.mail.pages.connect import ConnectPage
+    from src.mail.pages.oauth import OAuthPage
 
     dpg.create_context()
     dpg.create_viewport(title="Remote Control", width=1280, height=800)
 
-    app.goto(ConnectPage())
+    app.goto(OAuthPage(redirect=ConnectPage))
 
     dpg.setup_dearpygui()
     dpg.show_viewport()
