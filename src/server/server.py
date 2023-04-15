@@ -52,9 +52,8 @@ rs.callbacks(sio)
 
 
 @sio.on("QUIT")
-def quit(sid):
-    exit(1)
-    return
+async def quit(sid, data):
+    await sio.disconnect(sid)
 
 
 def main():
