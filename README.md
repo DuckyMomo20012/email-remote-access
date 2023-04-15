@@ -276,31 +276,89 @@ Start the program:
 
 ## :eyes: Usage
 
-First, you need to run the server:
+- **Server:**
 
-```bash
-poe dev
-```
+  Run the server:
 
-The server will run on with port `5656` and with host `0.0.0.0`, which is **the
-IP address of your local machine**.
+  ```bash
+  poe dev
+  ```
 
-Then, you can run the client app:
+  OR
 
-```bash
-poe dev client
-```
+  ```bash
+  poe dev server
+  ```
 
-OR
+  The server will run on with port `5656` and with host `0.0.0.0`, which is
+  **the IP address of your local machine**.
 
-```bash
-poe dev mail
-```
+- **Client App:**
 
-Connect to the server by entering the server's IP address and port:
+  Run the client app:
 
-- **IP address:** The IP address of your server machine.
-- **Port:** `5656`.
+  ```bash
+  poe dev client
+  ```
+
+  Connect to the server by entering the server's IP address and port:
+
+  - **IP address:** The IP address of your server machine.
+  - **Port:** `5656`.
+
+- **Mail App:**
+
+  > **Note**: To use this app, you need to provide the `credentials.json` file
+  > in the `src/mail` directory. Please follow the instructions in the page:
+  > [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
+  > to create your own App and download the `credentials.json` file.
+
+  Run the mail app:
+
+  ```bash
+  poe dev mail
+  ```
+
+  If this is the first time you run the app, you will be asked to authorize the
+  app. The app will open a browser window and ask you to log in to your Google
+  account.
+
+  After you log in, you will be asked to give the app permissions:
+
+  - **Read all resources and their metadata—no write operations.**
+  - **Send messages only. No read or modify privileges on mailbox.**
+
+  The token will be saved in the file `token.json` in the `src/mail` directory.
+
+  > **Warning**: The file `credentials.json` and `token.json` are **sensitive
+  > files**, **DO NOT** share them with anyone.
+
+  Connect to the server by entering the server's IP address and port:
+
+  - **IP address:** The IP address of your server machine.
+  - **Port:** `5656`.
+
+- **Dear PyGui Demo:**
+
+  Run the demo:
+
+  ```bash
+  poe dev demo
+  ```
+
+  The demo will demonstrate all the features of the Dear PyGui library.
+
+- **CLI:**
+
+  ```bash
+  Usage: cli.py [OPTIONS] [SERVICE]:[server|client|mail]
+
+  Arguments:
+    [SERVICE]:[server|client|mail]  Service to run  [default: server]
+
+  Options:
+    --help  Show this message and exit.
+  ```
 
 <!-- Roadmap -->
 
