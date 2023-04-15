@@ -55,7 +55,7 @@ class ClientApp:
     def back(self, ui):
         ui.place_forget()
         f2.place(x=0, y=0)
-        self.sio.emit("QUIT")
+        # self.sio.emit("QUIT", "")
 
     def live_screen(self):
         self.sio.emit("LIVESCREEN:start", "")
@@ -76,7 +76,7 @@ class ClientApp:
         ui.place_forget()
         ui.tree.pack_forget()
         f2.place(x=0, y=0)
-        self.sio.emit("QUIT")
+        # self.sio.emit("QUIT", "")
 
     def directory_tree(self):
         tmp = dt.DirectoryTree_UI(self.root, self.sio)
@@ -91,7 +91,7 @@ class ClientApp:
     def disconnect(self):
         f2.place_forget()
         self.f1.place(x=0, y=0)
-        self.sio.emit("QUIT")
+        # self.sio.emit("QUIT", "")
         return
 
     def keylogger(self):

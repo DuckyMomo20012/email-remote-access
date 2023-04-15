@@ -4,7 +4,7 @@ import socketio
 
 
 def close_event(main: tk.Toplevel, sio: socketio.Client):
-    sio.emit("QUIT")
+    # sio.emit("QUIT", "")
     main.destroy()
     return
 
