@@ -49,13 +49,10 @@
   - [Screenshots](#camera-screenshots)
   - [Tech Stack](#space_invader-tech-stack)
   - [Features](#dart-features)
-  - [Color Reference](#art-color-reference)
   - [Environment Variables](#key-environment-variables)
 - [Getting Started](#toolbox-getting-started)
   - [Prerequisites](#bangbang-prerequisites)
   - [Run Locally](#running-run-locally)
-  - [Running Tests](#test_tube-running-tests)
-  - [Deployment](#triangular_flag_on_post-deployment)
 - [Usage](#eyes-usage)
 - [Roadmap](#compass-roadmap)
 - [Contributing](#wave-contributing)
@@ -85,40 +82,19 @@
   <summary>Client</summary>
   <ul>
     <li><a href="https://www.python.org/">Python</a></li>
+    <li><a href="https://python-socketio.readthedocs.io/en/latest/index.html">SocketIO</a></li>
+    <li><a href="https://docs.python.org/3/library/tkinter.html">Tkinter</a></li>
+    <li><a href="https://dearpygui.readthedocs.io/en/latest/">Dear PyGui</a></li>
   </ul>
 </details>
 
 <details>
   <summary>Server</summary>
   <ul>
-    <li><a href="https://www.typescriptlang.org/">Typescript</a></li>
-    <li><a href="https://expressjs.com/">Express.js</a></li>
-    <li><a href="https://go.dev/">Golang</a></li>
-    <li><a href="https://nestjs.com/">Nest.js</a></li>
-    <li><a href="https://socket.io/">SocketIO</a></li>
-    <li><a href="https://www.prisma.io/">Prisma</a></li>
-    <li><a href="https://www.apollographql.com/">Apollo</a></li>
-    <li><a href="https://graphql.org/">GraphQL</a></li>
-  </ul>
-</details>
-
-<details>
-<summary>Database</summary>
-  <ul>
-    <li><a href="https://www.mysql.com/">MySQL</a></li>
-    <li><a href="https://www.postgresql.org/">PostgreSQL</a></li>
-    <li><a href="https://redis.io/">Redis</a></li>
-    <li><a href="https://neo4j.com/">Neo4j</a></li>
-    <li><a href="https://www.mongodb.com/">MongoDB</a></li>
-  </ul>
-</details>
-
-<details>
-<summary>DevOps</summary>
-  <ul>
-    <li><a href="https://www.docker.com/">Docker</a></li>
-    <li><a href="https://www.jenkins.io/">Jenkins</a></li>
-    <li><a href="https://circleci.com/">CircleCLI</a></li>
+    <li><a href="https://www.python.org/">Python</a></li>
+    <li><a href="https://python-socketio.readthedocs.io/en/latest/index.html">SocketIO</a></li>
+    <li><a href="https://fastapi.tiangolo.com/">FastAPI</a></li>
+    <li><a href="https://www.uvicorn.org/">uvicorn</a></li>
   </ul>
 </details>
 
@@ -126,20 +102,55 @@
 
 ### :dart: Features
 
-- Feature 1.
-- Feature 2.
-- Feature 3.
+- **Client App:** A simple GUI app to control remote computer
 
-<!-- Color Reference -->
+  - Shutdown/logout:
+    - [x] Shutdown computer.
+    - [x] Logout computer.
+  - MAC address:
+    - [x] Get computer's MAC address.
+  - Livescreen:
+    - [x] Live stream computer's screen.
+    - [x] Save screenshot.
+  - Directory:
+    - [x] List all files in a directory.
+    - [x] Copy files to client computer.
+    - [x] Copy files to server computer.
+    - [x] Delete files.
+  - App process:
+    - [x] List all processes.
+    - [x] List applications.
+    - [x] Kill processes.
+  - Registry:
+    - [x] Create registry key.
+    - [x] Delete registry key.
+    - [x] Get registry value.
+    - [x] Set registry value.
 
-### :art: Color Reference
+- **Mail App:** A simple GUI app to control remote computer using email
 
-| Color           | Hex                                                              |
-| --------------- | ---------------------------------------------------------------- |
-| Primary Color   | ![#222831](https://placehold.jp/222831/222831/10x10.png) #222831 |
-| Secondary Color | ![#393E46](https://placehold.jp/393E46/393E46/10x10.png) #393E46 |
-| Accent Color    | ![#00ADB5](https://placehold.jp/00ADB5/00ADB5/10x10.png) #00ADB5 |
-| Text Color      | ![#EEEEEE](https://placehold.jp/EEEEEE/EEEEEE/10x10.png) #EEEEEE |
+  - Shutdown/logout:
+    - [x] Shutdown computer.
+    - [x] Logout computer.
+  - MAC address:
+    - [x] Get computer's MAC address.
+  - Livescreen:
+    - [ ] Live stream computer's screen.
+    - [x] Save screenshot.
+  - Directory:
+    - [x] List all files in a directory.
+    - [ ] Copy files to client computer.
+    - [ ] Copy files to server computer.
+    - [ ] Delete files.
+  - App process:
+    - [x] List all processes.
+    - [x] List applications.
+    - [ ] Kill processes.
+  - Registry:
+    - [ ] Create registry key.
+    - [ ] Delete registry key.
+    - [ ] Get registry value.
+    - [ ] Set registry value.
 
 <!-- Env Variables -->
 
@@ -231,57 +242,76 @@ poetry shell
 
 Start the program:
 
-```bash
-poe dev
-```
+- **Server:**
 
-<!-- Running Tests -->
+  ```bash
+  poe dev
+  ```
 
-### :test_tube: Running Tests
+  OR
 
-To run tests, run the following command:
+  ```bash
+  poe dev server
+  ```
 
-```bash
-poe test
-```
+- **Client App:**
 
-<!-- Deployment -->
+  ```bash
+  poe dev client
+  ```
 
-### :triangular_flag_on_post: Deployment
+- **Mail App:**
 
-To deploy this project run:
+  ```bash
+  poe dev mail
+  ```
 
-```bash
-poe deploy
-```
+- **Dear PyGui Demo:**
+
+  ```bash
+  poe dev demo
+  ```
 
 <!-- Usage -->
 
 ## :eyes: Usage
 
-Use this space to tell a little more about your project and how it can be used.
-Show additional screenshots, code samples, demos, or links to other resources.
+First, you need to run the server:
 
-```python
-from environs import Env
-
-env = Env()
-# Read .env into os.environ
-env.read_env()
-
-print("Hello World")
-
-TEST_VAR = env.str("TEST_VAR")
-
-print(f"My secret key: {TEST_VAR}")
+```bash
+poe dev
 ```
+
+The server will run on with port `5656` and with host `0.0.0.0`, which is **the
+IP address of your local machine**.
+
+Then, you can run the client app:
+
+```bash
+poe dev client
+```
+
+OR
+
+```bash
+poe dev mail
+```
+
+Connect to the server by entering the server's IP address and port:
+
+- **IP address:** The IP address of your server machine.
+- **Port:** `5656`.
 
 <!-- Roadmap -->
 
 ## :compass: Roadmap
 
-- [x] Todo 1.
-- [ ] Todo 2.
+- [ ] Rebuild the server with `Dear PyGui`.
+- [ ] Rebuild the client app with `Dear PyGui`.
+- [ ] Support more features for Mail App.
+  - [ ] Copy files to client computer.
+  - [ ] Copy files to server computer.
+  - [ ] Delete files.
 
 <!-- Contributing -->
 
@@ -300,13 +330,19 @@ Please read the
 
 ## :grey_question: FAQ
 
-- Question 1
+- Why do you migrate to `SocketIO`?
 
-  - Answer 1.
+  - The server and client app are built with normal `socket`, the dataflow is
+    somewhat harder to track, debug and maintain. So I decided to migrate to
+    `SocketIO` for better dataflow management.
 
-- Question 2
+- Why do you migrate to `Dear PyGui`?
 
-  - Answer 2.
+  - The server and client app are built with `tkinter`, which is a bit hard to
+    use and maintain. The `tkinter`'s `mainloop` is quite hard to close
+    manually, and it's not shutdown properly when the program is closed. So I
+    decided to migrate to `Dear PyGui` for better UI and better dataflow
+    management.
 
 <!-- License -->
 
@@ -334,3 +370,12 @@ Here are useful resources and libraries that we have used in our projects:
 
 - [Awesome Readme Template](https://github.com/Louis3797/awesome-readme-template):
   A detailed template to bootstrap your README file quickly.
+- [Dear PyGui](https://dearpygui.readthedocs.io/en/latest/): Dear PyGui is an
+  easy-to-use, dynamic, GPU-Accelerated, cross-platform graphical user interface
+  toolkit(GUI) for Python. It is “built with”
+  [Dear ImGui](https://github.com/ocornut/imgui).
+- [SocketIO](https://python-socketio.readthedocs.io/en/latest/): Python client
+  and server for Socket.IO.
+- [FastAPI](https://fastapi.tiangolo.com/): FastAPI framework, high performance,
+  easy to learn, fast to code, ready for production.
+- [uvicorn](https://www.uvicorn.org/): An ASGI web server, for Python.
