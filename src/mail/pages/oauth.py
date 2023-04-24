@@ -11,9 +11,9 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from src.mail.app import app
 from src.mail.pages.base import BasePage
 
-TOKEN_PATH = "src/mail/token.json"
+TOKEN_PATH = "token.json"
 
-CREDENTIALS_PATH = "src/mail/credentials.json"
+CREDENTIALS_PATH = "credentials.json"
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = [
