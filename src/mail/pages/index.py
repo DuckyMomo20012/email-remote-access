@@ -66,8 +66,15 @@ def parseMail(msg):
     body_data = []
     if parsedMsg.is_multipart():
         for part in parsedMsg.get_payload():
-            if "text" in part.get_content_maintype():
-                body_data.append(part.get_payload(decode=True).decode("utf-8"))
+            if part.is_multipart():
+                for subpart in part.get_payload():
+                    if "text" in subpart.get_content_maintype():
+                        body_data.append(
+                            subpart.get_payload(decode=True).decode("utf-8")
+                        )
+            else:
+                if "text" in part.get_content_maintype():
+                    body_data.append(part.get_payload(decode=True).decode("utf-8"))
     else:
         body_data = parsedMsg.get_payload(decode=True).decode("utf-8")
     if body_data is not None:
