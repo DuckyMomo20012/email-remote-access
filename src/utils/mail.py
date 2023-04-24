@@ -2,6 +2,43 @@ import base64
 import email
 import email.header
 import email.utils
+import mimetypes
+import os
+from email.message import EmailMessage
+
+
+def composeMail(
+    fromUser: str, toUser: str, subject: str, body: str, attachments: list[str]
+):
+    message = EmailMessage()
+
+    message["To"] = toUser
+    message["From"] = fromUser
+    message["Subject"] = subject
+
+    message.set_content(body)
+
+    for file in attachments:
+        # Guess the content type based on the file's extension. Encoding will be
+        # ignored, although we should check for simple things like gzip'd or
+        # compressed files.
+        ctype, encoding = mimetypes.guess_type(file)
+
+        if ctype is None or encoding is not None:
+            # No guess could be made, or the file is encoded (compressed), so
+            # use a generic bag-of-bits type.
+            ctype = "application/octet-stream"
+        maintype, subtype = ctype.split("/", 1)
+
+        filename = os.path.basename(file)
+
+        with open(file, "rb") as f:
+            content = f.read()
+            message.add_attachment(
+                content, maintype=maintype, subtype=subtype, filename=filename
+            )
+
+    return message
 
 
 def parseMail(msg):
