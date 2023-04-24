@@ -1,4 +1,5 @@
 import os
+import webbrowser
 from multiprocessing.pool import ThreadPool
 from typing import Union
 
@@ -20,6 +21,8 @@ SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
 ]
 
+OAUTH_LOCAL_SERVER_PORT = 8080
+
 
 class OAuthPage(BasePage):
     def __init__(self, redirect: BasePage, tag: Union[int, str] = "w_oauth"):
@@ -27,7 +30,13 @@ class OAuthPage(BasePage):
         self.redirect = redirect
 
     def render(self):
-        dpg.add_window(label="OAuth", tag=self.tag, width=400, height=200)
+        dpg.add_window(
+            label="OAuth",
+            tag=self.tag,
+            width=400,
+            height=200,
+            horizontal_scrollbar=True,
+        )
         dpg.add_text("Checking authorization...", parent=self.tag, tag="t_oauth_status")
         dpg.add_button(
             label="Redirect",
@@ -57,14 +66,6 @@ class OAuthPage(BasePage):
                 dpg.set_value("t_oauth_status", "Authorized")
                 dpg.configure_item("b_redirect", show=True)
             else:
-                dpg.set_value(
-                    "t_oauth_status",
-                    (
-                        "Please continue the authorization in the opened "
-                        "browser window."
-                    ),
-                )
-
                 # NOTE: run_local_server() is blocking, so we have to run it in
                 # a thread.
                 def handleThread():
@@ -72,9 +73,28 @@ class OAuthPage(BasePage):
                     # "credentials.json" file but "redirect_uri", so we have to
                     # explicitly pass it if you don't call "flow.run_local_server()"
                     flow = InstalledAppFlow.from_client_secrets_file(
-                        CREDENTIALS_PATH, SCOPES
+                        CREDENTIALS_PATH,
+                        SCOPES,
+                        redirect_uri=f"http://localhost:{OAUTH_LOCAL_SERVER_PORT}",
                     )
-                    app.creds = flow.run_local_server(port=0)
+
+                    dpg.set_value(
+                        "t_oauth_status",
+                        (
+                            "Please continue the authorization in the opened "
+                            "browser window, or visit the following URL:"
+                        ),
+                    )
+                    auth_url, _ = flow.authorization_url()
+
+                    dpg.add_button(
+                        tag="b_auth_url",
+                        label=f"{auth_url}",
+                        callback=lambda: webbrowser.open(auth_url),
+                        parent=self.tag,
+                    )
+
+                    app.creds = flow.run_local_server(port=OAUTH_LOCAL_SERVER_PORT)
 
                     # Save the credentials for the next run
                     with open(TOKEN_PATH, "w") as token:
@@ -84,6 +104,8 @@ class OAuthPage(BasePage):
                     dpg.configure_item("b_redirect", show=True)
 
                 with ThreadPool(processes=1) as pool:
+                    # REVIEW: Exception can't be caught here, so we have to
+                    # find a way to handle it.
                     # NOTE: As the function is defined in the this context, we
                     # don't have to pass other arguments.
                     pool.apply_async(handleThread)
