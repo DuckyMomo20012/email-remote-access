@@ -42,6 +42,13 @@ def main():
     dpg.create_context()
     dpg.create_viewport(title="Remote Control", width=1280, height=800)
 
+    with dpg.font_registry():
+        # First argument ids the path to the .ttf or .otf file
+        with dpg.font("assets/fonts/IBMPlexMono-Regular.ttf", 20) as default_font:
+            dpg.add_font_range_hint(dpg.mvFontRangeHint_Vietnamese)
+
+    dpg.bind_font(default_font)
+
     app.goto(OAuthPage(redirect=ConnectPage))
 
     dpg.setup_dearpygui()
