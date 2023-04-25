@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from typing import Literal, Union
 
 import dearpygui.dearpygui as dpg
@@ -137,18 +138,39 @@ class IndexPage(BasePage):
                         for cmd in mail["cmd"]:
 
                             def handleCmdClick(sender, app_data, user_data):
+                                parsedMsg = user_data["parsedMsg"]
+                                cmd = user_data["cmd"]
+
                                 dpg.configure_item(sender, label="Running...")
 
-                                # Sleep for 5 second to simulate running
-                                # time.sleep(5)
+                                # NOTE: We don't wait for the command to finish
+                                # running
+                                executor = ThreadPoolExecutor()
+                                future = executor.submit(
+                                    self.runCmd,
+                                    self.service,
+                                    app.sio,
+                                    cmd,
+                                    mail["from"],
+                                )
+                                executor.shutdown(wait=False)
 
-                                self.runCmd(cmd, mail["from"])
-
-                                dpg.configure_item(sender, label="Done")
+                                future.add_done_callback(
+                                    lambda _f: dpg.configure_item(sender, label="Done")
+                                )
 
                             with dpg.group(horizontal=True):
                                 dpg.add_text(cmd)
-                                dpg.add_button(label="Run", callback=handleCmdClick)
+                                dpg.add_button(
+                                    label="Run",
+                                    callback=handleCmdClick,
+                                    # NOTE: A little trick to fix the late
+                                    # binding problem
+                                    user_data={
+                                        "cmd": cmd,
+                                        "parsedMsg": mail,
+                                    },
+                                )
 
                         if not mail["cmd"]:
                             dpg.add_text("No commands found")
