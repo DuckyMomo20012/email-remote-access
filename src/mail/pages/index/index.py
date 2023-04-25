@@ -1,3 +1,5 @@
+import base64
+import email
 import re
 from concurrent.futures import ThreadPoolExecutor
 from typing import Literal, Optional, TypedDict, Union, cast
@@ -7,7 +9,8 @@ from googleapiclient.discovery import build
 
 from src.mail.app import app
 from src.mail.pages.base import BasePage
-from src.utils.mail import parseMail
+from src.utils.mail import composeMail, parseMail
+
 
 class Command(TypedDict):
     type: Literal[
@@ -77,6 +80,41 @@ def parseCmd(msg: str) -> list[Command]:
         )
 
     return cmds
+
+
+# NOTE: This acts as a wrapper as we have to prepare some metadata before
+# sending the message
+def sendMessage(service, reqMessage, body, attachments=[], reply=True):
+    userInfo = service.users().getProfile(userId="me").execute()
+
+    fromUser = userInfo["emailAddress"]
+
+    parsedReq = email.message_from_bytes(base64.urlsafe_b64decode(reqMessage["raw"]))
+
+    toUser = parsedReq["From"]
+
+    subject = f"{parsedReq['Subject']}"
+    if reply:
+        subject = f"Re: {subject}"
+
+    message = composeMail(fromUser, toUser, subject, body, attachments)
+
+    if reply:
+        message["References"] = reqMessage["threadId"]
+        message["In-Reply-To"] = reqMessage["threadId"]
+
+    # encoded message
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    if reply:
+        create_message = {
+            "raw": encoded_message,
+            "threadId": reqMessage["threadId"],
+        }
+    else:
+        create_message = {"raw": encoded_message}
+
+    service.users().messages().send(userId="me", body=create_message).execute()
 
 
 
