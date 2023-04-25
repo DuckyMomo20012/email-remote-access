@@ -1,14 +1,18 @@
 import base64
 import email
+import os
 import re
+import uuid
 from concurrent.futures import ThreadPoolExecutor
 from typing import Literal, Optional, TypedDict, Union, cast
 
 import dearpygui.dearpygui as dpg
+import tabulate
 from googleapiclient.discovery import build
 
 from src.mail.app import app
 from src.mail.pages.base import BasePage
+from src.mail.pages.error import ErrorWindow
 from src.utils.mail import composeMail, parseMail
 
 
@@ -103,6 +107,154 @@ def sendMessage(service, reqMessage, body, attachments=[], reply=True):
     service.users().messages().send(userId="me", body=create_message).execute()
 
 
+# REVIEW: This is a bit messy, we should refactor this later
+def runCmd(service, sio, cmd: Command, reqMessage):
+    if cmd["type"] == "shutdown":
+        sio.emit("SD_LO:shutdown", "")
+
+        sendMessage(service, reqMessage, '"shutdown" command sent to client')
+    elif cmd["type"] == "logout":
+        sio.emit("SD_LO:logout", "")
+
+        sendMessage(service, reqMessage, '"logout" command sent to client')
+    elif cmd["type"] == "mac_address":
+
+        def handleMacData(address: str):
+            address = address[2:].upper()
+            address = ":".join(address[i : i + 2] for i in range(0, len(address), 2))
+
+            sendMessage(
+                service,
+                reqMessage,
+                f"Client MAC Address: {address}",
+            )
+
+        sio.emit("MAC:info", "", callback=handleMacData)
+    elif cmd["type"] == "screenshot":
+
+        def handleScreenshotData(data: bytes):
+            try:
+                tmpImgFile = f"screenshot_{uuid.uuid4()}.png"
+                with open(tmpImgFile, "wb") as f:
+                    f.write(data)
+
+                sendMessage(
+                    service,
+                    reqMessage,
+                    "Client Screenshot",
+                    attachments=[tmpImgFile],
+                )
+
+            except Exception as e:
+                print(e)
+            finally:
+                os.remove(tmpImgFile)
+
+        sio.emit("LIVESCREEN:screenshot", "", callback=handleScreenshotData)
+    elif cmd["type"] == "list_directory":
+        path = cmd["options"]
+
+        def handleDirectoryData(data: str):
+            try:
+                tmpTextFile = f"directory_{uuid.uuid4()}.txt"
+                with open(tmpTextFile, "wb") as f:
+                    f.write(data.encode("utf-8"))
+
+                sendMessage(
+                    service,
+                    reqMessage,
+                    f'"{path}" directory',
+                    attachments=[tmpTextFile],
+                )
+            except Exception as e:
+                print(e)
+            finally:
+                os.remove(tmpTextFile)
+
+        sio.emit("DIRECTORY:list_dirs:pretty", path, callback=handleDirectoryData)
+    elif cmd["type"] == "list_process":
+
+        def handleProcessData(data: list[list]):
+            [procName, procId, threadCount] = data
+
+            processInfo = list(zip(procName, procId, threadCount))
+
+            prettyTable = tabulate.tabulate(
+                processInfo,
+                headers=["Process name", "PID", "Threads"],
+                tablefmt="grid",
+            )
+
+            try:
+                tmpTextFile = f"process_{uuid.uuid4()}.txt"
+                with open(tmpTextFile, "wb") as f:
+                    f.write(prettyTable.encode("utf-8"))
+
+                sendMessage(
+                    service,
+                    reqMessage,
+                    "Client Process List",
+                    attachments=[tmpTextFile],
+                )
+            except Exception as e:
+                print(e)
+            finally:
+                os.remove(tmpTextFile)
+
+        sio.emit("APP_PRO:list", "", callback=handleProcessData)
+    elif cmd["type"] == "list_application":
+
+        def handleAppData(data: list[list]):
+            [appName, procId, threadCount] = data
+
+            appInfo = list(zip(appName, procId, threadCount))
+
+            prettyTable = tabulate.tabulate(
+                appInfo,
+                headers=["App name", "PID", "Threads"],
+                tablefmt="grid",
+            )
+
+            try:
+                tmpTextFile = f"app_{uuid.uuid4()}.txt"
+                with open(tmpTextFile, "wb") as f:
+                    f.write(prettyTable.encode("utf-8"))
+
+                sendMessage(
+                    service,
+                    reqMessage,
+                    "Client Application List",
+                    attachments=[tmpTextFile],
+                )
+            except Exception as e:
+                print(e)
+            finally:
+                os.remove(tmpTextFile)
+
+        sio.emit("APP_PRO:list:app", "", callback=handleAppData)
+
+    elif cmd["type"] == "kill_process":
+        pid = cmd["options"]
+
+        def handleKillStatus(status: bool):
+            if status:
+                sendMessage(
+                    service,
+                    reqMessage,
+                    f"Process with PID {pid} killed",
+                )
+            else:
+                sendMessage(
+                    service,
+                    reqMessage,
+                    f"Process with PID {pid} not found",
+                )
+
+        sio.emit("APP_PRO:kill", pid, callback=handleKillStatus)
+    else:
+        ErrorWindow("Unknown command")
+
+
 class IndexPage(BasePage):
     def __init__(self, tag: Union[int, str] = "w_index"):
         super().__init__(tag)
@@ -137,30 +289,6 @@ class IndexPage(BasePage):
 
     def getData(self):
         self.mails = self.fetchMail(maxEntries=self.fetchMaxEntries)
-
-    def runCmd(self, cmd: Command, toUser: str):
-        # TODO: Switch each command and send desired command to "toUser"
-        # NOTE: Use "self.service" to send email
-        # NOTE: Use "app.sio" to register socket.io event callback (emit
-        # events/listen for response)
-
-        # This will send a "foo" event to the server with "some_data" as the
-        # data and receive a response from the server. It's like req/res in a
-        # web server.
-        # E.g.:
-        # app.sio.emit("foo", "some_data", callback=lambda data: print(data))
-
-        # This will send a "foo" event to the server with "some_data" as the
-        # data and listen for a "bar" event from the server. It's quite like the
-        # above approach but it's more like a pub/sub model.
-        # E.g.:
-        # app.sio.emit("foo", "some_data")
-
-        # @app.sio.on("bar")
-        # def on_bar(data):
-        #     pass
-
-        pass
 
     def handleRefreshClick(self):
         self.getData()
@@ -206,7 +334,7 @@ class IndexPage(BasePage):
                                 # running
                                 executor = ThreadPoolExecutor()
                                 future = executor.submit(
-                                    self.runCmd,
+                                    runCmd,
                                     self.service,
                                     app.sio,
                                     cmd,
