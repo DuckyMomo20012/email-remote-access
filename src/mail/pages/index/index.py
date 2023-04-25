@@ -1,5 +1,6 @@
+import re
 from concurrent.futures import ThreadPoolExecutor
-from typing import Literal, Union
+from typing import Literal, Optional, TypedDict, Union, cast
 
 import dearpygui.dearpygui as dpg
 from googleapiclient.discovery import build
@@ -8,18 +9,21 @@ from src.mail.app import app
 from src.mail.pages.base import BasePage
 from src.utils.mail import parseMail
 
-Command = Literal[
-    "shutdown",
-    "logout",
-    "mac_address",
-    "screenshot",
-    "list_directory",
-    "list_process",
-    "list_application",
-    "kill_process",
-]
+class Command(TypedDict):
+    type: Literal[
+        "shutdown",
+        "logout",
+        "mac_address",
+        "screenshot",
+        "list_directory",
+        "list_process",
+        "list_application",
+        "kill_process",
+    ]
+    options: Optional[str]
 
-DEFAULT_COMMANDS: list[Command] = [
+
+DEFAULT_COMMANDS = [
     "shutdown",
     "logout",
     "mac_address",
@@ -46,7 +50,35 @@ def parseMessage(msg):
 
 
 def parseCmd(msg: str) -> list[Command]:
-    return [cmd for cmd in DEFAULT_COMMANDS if cmd in msg]
+    # NOTE: The pattern was not intentionally escaped to join the commands with
+    # `|`
+    cmdPattern = "|".join(DEFAULT_COMMANDS)
+
+    # NOTE: We limit the options to only alphanumeric and `\\` and `:` to
+    # increase the matching accuracy. The `\\` and `:` was included in the
+    # options for the file path
+    pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:]*))?\)"
+
+    result = re.finditer(pattern, msg)
+
+    cmds: list[Command] = []
+
+    for match in result:
+        type, options = match.group("type", "options")
+
+        cmds.append(
+            cast(
+                Command,
+                {
+                    "type": type,
+                    "options": options,
+                },
+            )
+        )
+
+    return cmds
+
+
 
 
 class IndexPage(BasePage):
