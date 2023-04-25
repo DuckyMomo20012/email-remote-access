@@ -6,7 +6,7 @@ from socketio.exceptions import ConnectionError
 from src.mail.app import app
 from src.mail.pages.base import BasePage
 from src.mail.pages.error import ErrorWindow
-from src.mail.pages.index import IndexPage
+from src.mail.pages.index.index import IndexPage
 
 PORT = 5656
 
