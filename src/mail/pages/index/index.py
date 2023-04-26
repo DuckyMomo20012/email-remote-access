@@ -429,7 +429,20 @@ class IndexPage(BasePage):
 
     def render(self):
         with dpg.window(label="Mail Inbox", tag=self.tag, width=400, height=200):
-            dpg.add_text("Inbox")
+            with dpg.group(horizontal=True):
+                dpg.add_text("Inbox")
+
+                def handleFetchMaxEntriesClick(sender, app_data, user_data):
+                    self.fetchMaxEntries = int(app_data)
+                    self.handleRefreshClick()
+
+                dpg.add_combo(
+                    ("5", "10", "15", "20"),
+                    default_value=f"{self.fetchMaxEntries}",
+                    label="Last mails",
+                    width=100,
+                    callback=handleFetchMaxEntriesClick,
+                )
 
             with dpg.menu_bar():
                 with dpg.menu(label="Actions"):
