@@ -70,8 +70,22 @@
 
 ### :camera: Screenshots
 
+- Server App:
+
 <div align="center">
-  <img src="https://placehold.co/600x400?text=Your+Screenshot+here" alt="screenshot" />
+  <img src="https://user-images.githubusercontent.com/64480713/234619906-c093e3a7-d396-4e17-93ab-75bc9fe4e52c.png" alt="server_app_screenshot" />
+</div>
+
+- Client App:
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/64480713/234620646-cd42fc24-a787-4572-9725-b14ce9648be9.png" alt="client_app_screenshot" />
+</div>
+
+- Mail App:
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/64480713/234620319-cc0a6ec3-00b4-41b5-928c-3133c5b7cdcf.png" alt="mail_app_screenshot" />
 </div>
 
 <!-- TechStack -->
