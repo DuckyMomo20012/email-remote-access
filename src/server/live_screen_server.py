@@ -23,7 +23,7 @@ def callbacks(sio: socketio.AsyncServer):
             img.save(img_bytes, format="PNG")
             data = img_bytes.getvalue()
 
-            await sio.emit("LIVESCREEN:stream", data)
+            await sio.emit("LIVESCREEN:stream", data, to=sid)
 
     @sio.on("LIVESCREEN:screenshot")
     def on_screenshot(sid, data):
