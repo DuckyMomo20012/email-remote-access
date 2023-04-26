@@ -9,22 +9,22 @@
 <!-- Badges -->
 <p>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/graphs/contributors">
-    <img src="https://badgen.cyclic.app/github/contributors/DuckyMomo20012/email-remote-access" alt="contributors" />
+    <img src="https://img.shields.io/github/contributors/DuckyMomo20012/email-remote-access" alt="contributors" />
   </a>
   <a href="">
-    <img src="https://badgen.cyclic.app/github/last-commit/DuckyMomo20012/email-remote-access/main" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/DuckyMomo20012/email-remote-access" alt="last update" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/network/members">
-    <img src="https://badgen.cyclic.app/github/forks/DuckyMomo20012/email-remote-access" alt="forks" />
+    <img src="https://img.shields.io/github/forks/DuckyMomo20012/email-remote-access" alt="forks" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/stargazers">
-    <img src="https://badgen.cyclic.app/github/stars/DuckyMomo20012/email-remote-access" alt="stars" />
+    <img src="https://img.shields.io/github/stars/DuckyMomo20012/email-remote-access" alt="stars" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/issues/">
-    <img src="https://badgen.cyclic.app/github/issues/DuckyMomo20012/email-remote-access" alt="open issues" />
+    <img src="https://img.shields.io/github/issues/DuckyMomo20012/email-remote-access" alt="open issues" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/blob/main/LICENSE">
-    <img src="https://badgen.cyclic.app/github/license/DuckyMomo20012/email-remote-access" alt="license" />
+    <img src="https://img.shields.io/github/license/DuckyMomo20012/email-remote-access.svg" alt="license" />
   </a>
 </p>
 
@@ -54,6 +54,17 @@
   - [Prerequisites](#bangbang-prerequisites)
   - [Run Locally](#running-run-locally)
 - [Usage](#eyes-usage)
+  - [Server](#server)
+  - [Server App](#server-app)
+  - [Client App](#client-app)
+  - [Mail App](#mail-app)
+    - [Authorize the app](#authorize-the-app)
+    - [Send mail](#send-mail)
+    - [Instruction format](#instruction-format)
+    - [Supported instructions](#supported-instructions)
+    - [Execute instructions](#execute-instructions)
+  - [Dear PyGui Demo](#dear-pygui-demo)
+  - [CLI](#cli)
 - [Roadmap](#compass-roadmap)
 - [Contributing](#wave-contributing)
   - [Code of Conduct](#scroll-code-of-conduct)
@@ -70,8 +81,22 @@
 
 ### :camera: Screenshots
 
+- Server App:
+
 <div align="center">
-  <img src="https://placehold.co/600x400?text=Your+Screenshot+here" alt="screenshot" />
+  <img src="https://user-images.githubusercontent.com/64480713/234619906-c093e3a7-d396-4e17-93ab-75bc9fe4e52c.png" alt="server_app_screenshot" />
+</div>
+
+- Client App:
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/64480713/234620646-cd42fc24-a787-4572-9725-b14ce9648be9.png" alt="client_app_screenshot" />
+</div>
+
+- Mail App:
+
+<div align="center">
+  <img src="https://user-images.githubusercontent.com/64480713/234620319-cc0a6ec3-00b4-41b5-928c-3133c5b7cdcf.png" alt="mail_app_screenshot" />
 </div>
 
 <!-- TechStack -->
@@ -135,17 +160,17 @@
   - MAC address:
     - [x] Get computer's MAC address.
   - Livescreen:
-    - [ ] Live stream computer's screen.
+    - [ ] Live stream computer's screen. (Won't do)
     - [x] Save screenshot.
   - Directory:
     - [x] List all files in a directory.
-    - [ ] Copy files to client computer.
-    - [ ] Copy files to server computer.
-    - [ ] Delete files.
+    - [x] Copy files to client computer.
+    - [x] Copy files to server computer.
+    - [x] Delete files.
   - App process:
     - [x] List all processes.
     - [x] List applications.
-    - [ ] Kill processes.
+    - [x] Kill processes.
   - Registry:
     - [ ] Create registry key.
     - [ ] Delete registry key.
@@ -218,6 +243,15 @@ poetry install
 
 OR:
 
+Install dependencies with `pip`:
+
+```bash
+pip install -r requirements.txt
+```
+
+<details>
+<summary>Export dependencies from </code>pyproject.toml</code></summary>
+
 Export Poetry dependencies to file `requirements.txt`:
 
 ```bash
@@ -226,11 +260,7 @@ poetry export -f requirements.txt --output requirements.txt
 
 > **Note**: You can add option: `--dev` to include development dependencies.
 
-Then install dependencies with `pip`:
-
-```bash
-pip install -r requirements.txt
-```
+</details>
 
 ---
 
@@ -242,7 +272,7 @@ poetry shell
 
 Start the program:
 
-- **Server:**
+- **Server App:**
 
   ```bash
   poe dev
@@ -252,6 +282,12 @@ Start the program:
 
   ```bash
   poe dev server
+  ```
+
+- **Server App (legacy):**
+
+  ```bash
+  poe dev server:legacy
   ```
 
 - **Client App:**
@@ -269,107 +305,308 @@ Start the program:
 - **Dear PyGui Demo:**
 
   ```bash
-  poe dev demo
+  poe demo
   ```
 
 <!-- Usage -->
 
 ## :eyes: Usage
 
-- **Server:**
+### Server:
 
-  Run the server:
+You will have to start the server manually by running the
+`src/server/server.py`:
 
-  ```bash
-  poe dev
-  ```
+```bash
+python src/server/server.py
+```
 
-  OR
+### Server App
 
-  ```bash
-  poe dev server
-  ```
+Run the server:
 
-  The server will run on with port `5656` and with host `0.0.0.0`, which is
-  **the IP address of your local machine**.
+```bash
+poe dev
+```
 
-- **Client App:**
+OR
 
-  Run the client app:
+```bash
+poe dev server
+```
 
-  ```bash
-  poe dev client
-  ```
+After the app starts, you will have to start the server manually by clicking the
+`Start server` button.
 
-  Connect to the server by entering the server's IP address and port:
+The server will run on with port `5656` and with host `0.0.0.0`, which is **the
+IP address of your local machine**.
 
-  - **IP address:** The IP address of your server machine.
-  - **Port:** `5656`.
+To stop the server, click the `Stop server` button.
 
-- **Mail App:**
+<details>
+<summary>Behind the scene</summary>
 
-  > **Note**: To use this app, you need to provide the `credentials.json` file
-  > in the `src/mail` directory. Please follow the instructions in the page:
-  > [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
-  > to create your own App and download the `credentials.json` file.
+We you click the `Start server` button, the app will start an `uvicorn` server
+in different process, and store the process ID for later use.
 
-  Run the mail app:
+When you click the `Stop server` button, the app will find child process with
+the ID stored before and kill it, then terminate the parent process.
 
-  ```bash
-  poe dev mail
-  ```
+</details>
 
-  If this is the first time you run the app, you will be asked to authorize the
-  app. The app will open a browser window and ask you to log in to your Google
-  account.
+### Client App
 
-  After you log in, you will be asked to give the app permissions:
+Run the client app:
 
-  - **Read all resources and their metadata—no write operations.**
-  - **Send messages only. No read or modify privileges on mailbox.**
+```bash
+poe dev client
+```
 
-  The token will be saved in the file `token.json` in the `src/mail` directory.
+Connect to the server by entering the server's IP address and port:
 
-  > **Warning**: The file `credentials.json` and `token.json` are **sensitive
-  > files**, **DO NOT** share them with anyone.
+- **IP address:** The IP address of your server machine.
+- **Port:** `5656`.
 
-  Connect to the server by entering the server's IP address and port:
+### Mail App
 
-  - **IP address:** The IP address of your server machine.
-  - **Port:** `5656`.
+> **Note**: To use this app, you need to provide the `credentials.json` file in
+> the root directory. Please follow the instructions in the page:
+> [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
+> to create your own App and download the `credentials.json` file.
 
-- **Dear PyGui Demo:**
+Run the mail app:
 
-  Run the demo:
+```bash
+poe dev mail
+```
 
-  ```bash
-  poe dev demo
-  ```
+#### Authorize the app
 
-  The demo will demonstrate all the features of the Dear PyGui library.
+If this is the first time you run the app, you will be asked to authorize the
+app. The app will open a browser window and ask you to log in to your Google
+account.
 
-- **CLI:**
+After you log in, you will be asked to give the app permissions:
 
-  ```bash
-  Usage: cli.py [OPTIONS] [SERVICE]:[server|client|mail]
+- **Read all resources and their metadata—no write operations.**
+- **Send messages only. No read or modify privileges on mailbox.**
 
-  Arguments:
-    [SERVICE]:[server|client|mail]  Service to run  [default: server]
+The token will be saved in the file `token.json` in the `src/mail` directory.
 
-  Options:
-    --help  Show this message and exit.
-  ```
+> **Warning**: The file `credentials.json` and `token.json` are **sensitive
+> files**, **DO NOT** share them with anyone.
+
+Connect to the server by entering the server's IP address and port:
+
+- **IP address:** The IP address of your server machine.
+- **Port:** `5656`.
+
+#### Send mail
+
+You can send an email to the address you logged in to the app.
+
+- Currently, the max number of emails that are fetched from the server is `5`.
+
+#### Instruction format
+
+```
+(<command>:<options>)
+```
+
+- **command**: The command to execute. The command is case-sensitive.
+- **options**: The options of the command. The options are separated by `;`. The
+  allowed characters are alphanumeric characters, `\`, `:`, `;` and `.`.
+  > **Note**: The `options` is optional and can be omitted.
+
+> **Note**: Each `instruction` don't have to be on a separate line.
+
+E.g.:
+
+```
+(command) # without options
+(command:option1;option2) # with multiple options
+(command1:) # with empty option
+(command1:)(command2) # multiple instructions on the same line
+```
+
+  <details>
+  <summary>Regex pattern</summary>
+
+```python
+cmdPattern = "|".join(DEFAULT_COMMANDS)
+pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+```
+
+  </details>
+
+#### Supported instructions
+
+- `shutdown`: Shutdown the server machine.
+
+  - Example:
+
+    ```
+    (shutdown)
+    ```
+
+- `logout`: Log out the current user.
+
+  - Example:
+
+    ```
+    (logout)
+    ```
+
+- `mac_address`: Get the MAC address of the server machine.
+
+  - Example:
+
+    ```
+    (mac_address)
+    ```
+
+- `screenshot`: Take a screenshot of the server machine.
+
+  - Example:
+
+    ```
+    (screenshot)
+    ```
+
+- `list_directory`: List directories and files in the given path.
+
+  - **Options**:
+
+    - `path`: The path to list.
+
+  - Example:
+
+    ```
+    (list_directory:C:\Users\Alice\Desktop)
+    ```
+
+- `copy_file_to_server`: Copy a file from the client machine to the server
+  machine.
+
+  - **Options**:
+
+    - `srcPath`: The path to the file on the client machine.
+    - `destPath`: The **directory** path to the file on the server machine.
+      > **Note**: The file name from `srcPath` will be appended to the
+      > `destPath`.
+
+  - Example:
+
+    ```
+    (copy_file_to_server:C:\Users\Alice\Desktop\test.txt;C:\Users\Alice\Desktop\)
+    ```
+
+    This will copy the file `test.txt` from the client machine to the directory
+    `C:\Users\Alice\Desktop\` on the server machine. The final path of the file
+    is: `C:\Users\Alice\Desktop\test.txt`.
+
+- `copy_file_to_client`: Copy a file from the server machine to the client
+  machine.
+
+  - **Options**:
+
+    - `srcPath`: The path to the file on the server machine.
+    - `destPath`: The **directory** path to the file on the client machine.
+
+      > **Note**: The file name from `srcPath` will be appended to the
+      > `destPath`.
+
+  - Example:
+
+    ```
+    (copy_file_to_client:C:\Users\Alice\Desktop\test.txt;C:\Users\Alice\Desktop\)
+    ```
+
+    This will copy the file `test.txt` from the server machine to the directory
+    `C:\Users\Alice\Desktop\` on the client machine. The final path of the file
+    is: `C:\Users\Alice\Desktop\test.txt`.
+
+- `delete_file`: Delete a file on the server machine.
+
+  - **Options**:
+
+    - `path`: The path to the file on the server machine.
+
+  - Example:
+
+    ```
+    (delete_file:C:\Users\Alice\Desktop\test.txt)
+    ```
+
+- `list_process`: List all the processes on the server machine.
+
+  - Example:
+
+    ```
+    (list_process)
+    ```
+
+- `list_application`: List all the applications on the server machine.
+
+  - Example:
+
+    ```
+    (list_application)
+    ```
+
+- `kill_process`: Kill a process on the server machine.
+
+  - **Options**:
+
+    - `pid`: The process ID of the process to kill.
+
+  - Example:
+
+    ```
+    (kill_process:1234)
+    ```
+
+#### Execute instructions
+
+You can execute instructions by clicking the `Run` button on the right side of
+the parsed instructions from received messages.
+
+The result will be send back to the email sender. By default, the message will
+be **sent as a reply** to the received message. The reply message may have
+attachments.
+
+### Dear PyGui Demo
+
+Run the demo:
+
+```bash
+poe dev demo
+```
+
+The demo will demonstrate all the features of the Dear PyGui library.
+
+### CLI
+
+```bash
+Usage: cli.py [OPTIONS] [SERVICE]:[server|server:legacy|client|mail]
+
+Arguments:
+  [SERVICE]:[server|server:legacy|client|mail]  Service to run  [default: server]
+
+Options:
+  --help  Show this message and exit.
+```
 
 <!-- Roadmap -->
 
 ## :compass: Roadmap
 
-- [ ] Rebuild the server with `Dear PyGui`.
+- [x] Rebuild the server with `Dear PyGui`.
 - [ ] Rebuild the client app with `Dear PyGui`.
-- [ ] Support more features for Mail App.
-  - [ ] Copy files to client computer.
-  - [ ] Copy files to server computer.
-  - [ ] Delete files.
+- [x] Support more features for Mail App.
+  - [x] Copy files to client computer.
+  - [x] Copy files to server computer.
+  - [x] Delete files.
 
 <!-- Contributing -->
 
