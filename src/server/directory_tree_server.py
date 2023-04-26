@@ -43,10 +43,10 @@ def delFile(path: str):
 
 # copy file from client to server
 def copyFileToServer(metadata: str, data: bytes):
-    [filename, filesize, path] = metadata.split(SEPARATOR)
-    filename = os.path.basename(filename)
+    [filePath, destPath] = metadata.split(SEPARATOR)
+    filename = os.path.basename(filePath)
     try:
-        with open(path + filename, "wb") as f:
+        with open(destPath + filename, "wb") as f:
             f.write(data)
         return True
     except Exception:

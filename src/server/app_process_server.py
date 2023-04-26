@@ -90,15 +90,15 @@ def callbacks(sio: socketio.AsyncServer):
 
     @sio.on("APP_PRO:list")
     def on_proc_list(sid, data):
-        ls1, ls2, ls3 = list_processes()
+        procNames, pids, threads = list_processes()
 
-        return [ls1, ls2, ls3]
+        return [procNames, pids, threads]
 
     @sio.on("APP_PRO:list:app")
     async def on_app_list(sid, data):
-        ls1, ls2, ls3 = list_apps()
+        appNames, pids, threads = list_apps()
 
-        return [ls1, ls2, ls3]
+        return [appNames, pids, threads]
 
     @sio.on("APP_PRO:start")
     async def on_proc_start(sid, name: str):

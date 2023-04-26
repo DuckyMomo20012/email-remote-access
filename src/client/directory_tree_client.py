@@ -207,13 +207,12 @@ class DirectoryTree_UI(Canvas):
 
     # copy file from client to server
     def copyFileToServer(self):
-        filename = filedialog.askopenfilename(
+        filePath = filedialog.askopenfilename(
             title="Select File", filetypes=[("All Files", "*.*")]
         )
-        if filename is None or filename == "":
+        if filePath is None or filePath == "":
             return
         destPath = self.currPath + "\\"
-        filesize = os.path.getsize(filename)
 
         def handleMessage(status: Literal["OK", "NOT OK"]):
             if status == "OK":
@@ -224,8 +223,8 @@ class DirectoryTree_UI(Canvas):
         self.sio.emit(
             "DIRECTORY:copyto",
             {
-                "metadata": f"{filename}{SEPARATOR}{filesize}{SEPARATOR}{destPath}",
-                "data": open(filename, "rb").read(),
+                "metadata": f"{filePath}{SEPARATOR}{destPath}",
+                "data": open(filePath, "rb").read(),
             },
             callback=handleMessage,
         )
