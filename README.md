@@ -9,22 +9,22 @@
 <!-- Badges -->
 <p>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/graphs/contributors">
-    <img src="https://badgen.cyclic.app/github/contributors/DuckyMomo20012/email-remote-access" alt="contributors" />
+    <img src="https://img.shields.io/github/contributors/DuckyMomo20012/email-remote-access" alt="contributors" />
   </a>
   <a href="">
-    <img src="https://badgen.cyclic.app/github/last-commit/DuckyMomo20012/email-remote-access/main" alt="last update" />
+    <img src="https://img.shields.io/github/last-commit/DuckyMomo20012/email-remote-access" alt="last update" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/network/members">
-    <img src="https://badgen.cyclic.app/github/forks/DuckyMomo20012/email-remote-access" alt="forks" />
+    <img src="https://img.shields.io/github/forks/DuckyMomo20012/email-remote-access" alt="forks" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/stargazers">
-    <img src="https://badgen.cyclic.app/github/stars/DuckyMomo20012/email-remote-access" alt="stars" />
+    <img src="https://img.shields.io/github/stars/DuckyMomo20012/email-remote-access" alt="stars" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/issues/">
-    <img src="https://badgen.cyclic.app/github/issues/DuckyMomo20012/email-remote-access" alt="open issues" />
+    <img src="https://img.shields.io/github/issues/DuckyMomo20012/email-remote-access" alt="open issues" />
   </a>
   <a href="https://github.com/DuckyMomo20012/email-remote-access/blob/main/LICENSE">
-    <img src="https://badgen.cyclic.app/github/license/DuckyMomo20012/email-remote-access" alt="license" />
+    <img src="https://img.shields.io/github/license/DuckyMomo20012/email-remote-access.svg" alt="license" />
   </a>
 </p>
 
