@@ -149,6 +149,10 @@ def runCmd(service, sio, cmd: Command, reqMessage):
 
         sio.emit("LIVESCREEN:screenshot", "", callback=handleScreenshotData)
     elif cmd["type"] == "list_directory":
+        if not cmd["options"]:
+            ErrorWindow("No path specified")
+            return
+
         path = cmd["options"]
 
         def handleDirectoryData(data: str):
@@ -231,6 +235,10 @@ def runCmd(service, sio, cmd: Command, reqMessage):
         sio.emit("APP_PRO:list:app", "", callback=handleAppData)
 
     elif cmd["type"] == "kill_process":
+        if not cmd["options"]:
+            ErrorWindow("No PID specified")
+            return
+
         pid = cmd["options"]
 
         def handleKillStatus(status: bool):
