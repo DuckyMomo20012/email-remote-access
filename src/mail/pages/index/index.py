@@ -120,9 +120,6 @@ def runCmd(service, sio, cmd: Command, reqMessage):
     elif cmd["type"] == "mac_address":
 
         def handleMacData(address: str):
-            address = address[2:].upper()
-            address = ":".join(address[i : i + 2] for i in range(0, len(address), 2))
-
             sendMessage(
                 service,
                 reqMessage,
