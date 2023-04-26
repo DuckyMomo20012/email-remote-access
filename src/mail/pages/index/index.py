@@ -38,20 +38,6 @@ DEFAULT_COMMANDS = [
 ]
 
 
-def parseMessage(msg):
-    cmd = []
-
-    parsedMsg = parseMail(msg)
-
-    if parsedMsg["body"] is not None:
-        cmd = parseCmd(parsedMsg["body"])
-
-    return {
-        **parsedMsg,
-        "cmd": cmd,
-    }
-
-
 def parseCmd(msg: str) -> list[Command]:
     # NOTE: The pattern was not intentionally escaped to join the commands with
     # `|`
@@ -117,8 +103,6 @@ def sendMessage(service, reqMessage, body, attachments=[], reply=True):
     service.users().messages().send(userId="me", body=create_message).execute()
 
 
-
-
 class IndexPage(BasePage):
     def __init__(self, tag: Union[int, str] = "w_index"):
         super().__init__(tag)
@@ -152,8 +136,7 @@ class IndexPage(BasePage):
         return messagePayloads
 
     def getData(self):
-        mails = self.fetchMail(maxEntries=self.fetchMaxEntries)
-        self.mails = [parseMessage(mail) for mail in mails]
+        self.mails = self.fetchMail(maxEntries=self.fetchMaxEntries)
 
     def runCmd(self, cmd: Command, toUser: str):
         # TODO: Switch each command and send desired command to "toUser"
@@ -197,18 +180,24 @@ class IndexPage(BasePage):
                     )
 
             for mail in self.mails:
+                parsedMail = parseMail(mail)
+
+                parsedCmd = []
+                if parsedMail["body"] is not None:
+                    parsedCmd = parseCmd(parsedMail["body"])
+
                 with dpg.tree_node(
-                    label=f'Subject: {mail["subject"]}', default_open=True
+                    label=f'Subject: {parsedMail["subject"]}', default_open=True
                 ):
-                    dpg.add_text("From: " + mail["from"])
-                    dpg.add_text("To: " + mail["to"])
-                    dpg.add_text("Date: " + mail["date"])
+                    dpg.add_text("From: " + parsedMail["from"])
+                    dpg.add_text("To: " + parsedMail["to"])
+                    dpg.add_text("Date: " + parsedMail["date"])
 
                     with dpg.tree_node(label="Commands", default_open=True):
-                        for cmd in mail["cmd"]:
+                        for cmd in parsedCmd:
 
                             def handleCmdClick(sender, app_data, user_data):
-                                parsedMsg = user_data["parsedMsg"]
+                                mail = user_data["mail"]
                                 cmd = user_data["cmd"]
 
                                 dpg.configure_item(sender, label="Running...")
@@ -221,7 +210,7 @@ class IndexPage(BasePage):
                                     self.service,
                                     app.sio,
                                     cmd,
-                                    mail["from"],
+                                    mail,
                                 )
                                 executor.shutdown(wait=False)
 
@@ -238,15 +227,15 @@ class IndexPage(BasePage):
                                     # binding problem
                                     user_data={
                                         "cmd": cmd,
-                                        "parsedMsg": mail,
+                                        "mail": mail,
                                     },
                                 )
 
-                        if not mail["cmd"]:
+                        if not parsedCmd:
                             dpg.add_text("No commands found")
 
                     with dpg.tree_node(label="Body", default_open=True):
                         with dpg.child_window(
                             height=200, autosize_x=True, horizontal_scrollbar=True
                         ):
-                            dpg.add_text(mail["body"])
+                            dpg.add_text(parsedMail["body"])
