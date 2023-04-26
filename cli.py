@@ -5,9 +5,21 @@ from environs import Env
 
 import src.client.app as clientApp
 import src.mail.app as mailApp
-import src.server.app as serverApp
+import src.server.app as serverAppLegacy
+import src.serverApp.app as serverApp
 
-TService = Enum("Service", {k: k for k in ["server", "client", "mail"]})  # type: ignore
+TService = Enum(  # type: ignore
+    "Service",
+    {
+        k: k
+        for k in [
+            "server",
+            "server:legacy",
+            "client",
+            "mail",
+        ]
+    },
+)
 
 env = Env()
 # Read .env into os.environ
@@ -17,6 +29,8 @@ env.read_env()
 def main(service: TService = typer.Argument("server", help="Service to run")):
     if str(service) == "Service.server":
         serverApp.main()
+    elif str(service) == "Service.server:legacy":
+        serverAppLegacy.main()
     elif str(service) == "Service.client":
         clientApp.main()
     elif str(service) == "Service.mail":
