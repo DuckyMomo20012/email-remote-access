@@ -13,6 +13,7 @@ from googleapiclient.discovery import build
 from src.mail.app import app
 from src.mail.pages.base import BasePage
 from src.mail.pages.error import ErrorWindow
+from src.server.directory_tree_server import SEPARATOR
 from src.utils.mail import composeMail, parseMail
 
 
@@ -23,6 +24,9 @@ class Command(TypedDict):
         "mac_address",
         "screenshot",
         "list_directory",
+        "copy_file_to_server",
+        "copy_file_to_client",
+        "delete_file",
         "list_process",
         "list_application",
         "kill_process",
@@ -36,6 +40,9 @@ DEFAULT_COMMANDS = [
     "mac_address",
     "screenshot",
     "list_directory",
+    "copy_file_to_server",
+    "copy_file_to_client",
+    "delete_file",
     "list_process",
     "list_application",
     "kill_process",
@@ -173,6 +180,98 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                 os.remove(tmpTextFile)
 
         sio.emit("DIRECTORY:list_dirs:pretty", path, callback=handleDirectoryData)
+    elif cmd["type"] == "copy_file_to_server":
+        if not cmd["options"]:
+            ErrorWindow("No file path or destination path specified")
+            return
+
+        filePath, destPath = cmd["options"].split(";")
+
+        if not filePath:
+            ErrorWindow("No file path specified")
+            return
+
+        if not os.path.exists(filePath):
+            ErrorWindow(f'"{filePath}" file not found')
+            return
+
+        def handleCopyFileStatus(status: str):
+            if status == "OK":
+                resMessage = f'"{filePath}" file copied to server'
+            else:
+                resMessage = f'Cannot copy "{filePath}" file to server'
+
+            sendMessage(
+                service,
+                reqMessage,
+                resMessage,
+            )
+
+        sio.emit(
+            "DIRECTORY:copyto",
+            {
+                "metadata": f"{filePath}{SEPARATOR}{destPath}",
+                "data": open(filePath, "rb").read(),
+            },
+            callback=handleCopyFileStatus,
+        )
+    elif cmd["type"] == "copy_file_to_client":
+        if not cmd["options"]:
+            ErrorWindow("No file path or destination path specified")
+            return
+
+        filePath, destPath = cmd["options"].split(";")
+
+        if not filePath:
+            ErrorWindow("No file path specified")
+            return
+
+        if not os.path.exists(filePath):
+            ErrorWindow(f'"{filePath}" file not found')
+            return
+
+        def handleReceiveFileData(data: dict):
+            if isinstance(data, dict) and "msg" in data:
+                sendMessage(service, reqMessage, data["msg"])
+                return
+
+            try:
+                fileName = data["filename"]
+                fileData = data["fileData"]
+
+                with open(os.path.abspath(destPath) + fileName, "wb") as f:
+                    f.write(fileData)
+            except Exception:
+                sendMessage(
+                    service,
+                    reqMessage,
+                    f'Cannot write "{filePath}" file to client',
+                )
+                return
+
+        sio.emit("DIRECTORY:copy", filePath, callback=handleReceiveFileData)
+
+    elif cmd["type"] == "delete_file":
+        if not cmd["options"]:
+            ErrorWindow("No file path specified")
+            return
+
+        path = cmd["options"]
+
+        def handleDeleteFileStatus(status: str):
+            if "OK":
+                resMessage = f'"{path}" file deleted'
+            else:
+                resMessage = f'Cannot delete "{path}" file'
+
+            sendMessage(
+                service,
+                reqMessage,
+                resMessage,
+            )
+
+        sio.emit("DIRECTORY:delete", path, callback=handleDeleteFileStatus)
+
     elif cmd["type"] == "list_process":
 
         def handleProcessData(data: list[list]):
