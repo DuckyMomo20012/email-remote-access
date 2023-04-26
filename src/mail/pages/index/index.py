@@ -54,29 +54,32 @@ def parseCmd(msg: str) -> list[Command]:
     # `|`
     cmdPattern = "|".join(DEFAULT_COMMANDS)
 
-    # NOTE: We limit the options to only alphanumeric and `\\` and `:` to
-    # increase the matching accuracy. The `\\` and `:` was included in the
-    # options for the file path
-    pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:]*))?\)"
+    # NOTE: We limit the options to only alphanumeric and `\\`, `:`, `;`, `.` to
+    # increase the matching accuracy. The `\\`, `:`, `.` was included in the
+    # options for the file path. The `;` was included for splitting options.
+    pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
 
     result = re.finditer(pattern, msg)
 
-    cmds: list[Command] = []
+    cmdUnique: list[Command] = []
 
     for match in result:
         type, options = match.group("type", "options")
 
-        cmds.append(
-            cast(
-                Command,
-                {
-                    "type": type,
-                    "options": options,
-                },
-            )
+        newCmd = cast(
+            Command,
+            {
+                "type": type,
+                "options": options,
+            },
         )
 
-    return cmds
+        # NOTE: This is just a simple way to remove duplicate commands from the
+        # list
+        if newCmd not in cmdUnique:
+            cmdUnique.append(newCmd)
+
+    return cmdUnique
 
 
 # NOTE: This acts as a wrapper as we have to prepare some metadata before
