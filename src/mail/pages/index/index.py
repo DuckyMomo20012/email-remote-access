@@ -261,7 +261,7 @@ def runCmd(service, sio, cmd: Command, reqMessage, reply=True):
                 fileName = data["filename"]
                 fileData = data["fileData"]
 
-                with open(os.path.abspath(destPath) + fileName, "wb") as f:
+                with open(destPath + fileName, "wb") as f:
                     f.write(fileData)
             except Exception:
                 sendMessage(
@@ -282,7 +282,7 @@ def runCmd(service, sio, cmd: Command, reqMessage, reply=True):
         path = cmd["options"]
 
         def handleDeleteFileStatus(status: str):
-            if "OK":
+            if status == "OK":
                 resMessage = f'"{path}" file deleted'
             else:
                 resMessage = f'Cannot delete "{path}" file'
