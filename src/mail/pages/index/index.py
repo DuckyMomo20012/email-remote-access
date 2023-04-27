@@ -140,12 +140,23 @@ class IndexPage(BasePage):
 
                             with dpg.group(horizontal=True):
                                 dpg.add_text(cmd)
-                                dpg.add_button(
+                                runBtn = dpg.add_button(
                                     label="Run",
                                     callback=handleCmdClick,
                                     # NOTE: A little trick to fix the late
                                     # binding problem
                                     user_data={
+                                        "cmd": cmd,
+                                        "mail": mail,
+                                    },
+                                )
+
+                            # NOTE: We "simulate" a click on the run button
+                            if cmd["autoRun"]:
+                                handleCmdClick(
+                                    runBtn,
+                                    None,
+                                    {
                                         "cmd": cmd,
                                         "mail": mail,
                                     },

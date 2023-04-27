@@ -21,6 +21,7 @@ class Command(TypedDict):
         "kill_process",
     ]
     options: Optional[str]
+    autoRun: bool
 
 
 DEFAULT_COMMANDS = [
@@ -46,18 +47,23 @@ def parseCmd(msg: str) -> list[Command]:
     # NOTE: We limit the options to only alphanumeric and `\\`, `:`, `;`, `.` to
     # increase the matching accuracy. The `\\`, `:`, `.` was included in the
     # options for the file path. The `;` was included for splitting options.
-    pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+    pattern = (
+        rf"(?P<autoRun>#)?\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+    )
 
     result = re.finditer(pattern, msg)
 
     cmdUnique: list[Command] = []
 
     for match in result:
-        type, options = match.group("type", "options")
+        autoRun, type, options = match.group("autoRun", "type", "options")
 
         newCmd = cast(
             Command,
             {
+                # NOTE: We can use bool(autoRun) as the `#` will be `True`. But
+                # it's better to be explicit
+                "autoRun": autoRun is not None,
                 "type": type,
                 "options": options,
             },
