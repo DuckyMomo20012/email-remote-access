@@ -16,6 +16,9 @@ class App:
         self.sio = socketio.Client()
         self.histories = []
 
+    def __del__(self):
+        self.sio.disconnect()
+
     def goto(self, page: BasePage):
         if len(self.histories) > 0:
             dpg.configure_item(self.histories[-1], show=False)
