@@ -118,15 +118,25 @@ def sendMessage(service, reqMessage, body, attachments=[], reply=True):
 
 
 # REVIEW: This is a bit messy, we should refactor this later
-def runCmd(service, sio, cmd: Command, reqMessage):
+def runCmd(service, sio, cmd: Command, reqMessage, reply=True):
     if cmd["type"] == "shutdown":
         sio.emit("SD_LO:shutdown", "")
 
-        sendMessage(service, reqMessage, '"shutdown" command sent to client')
+        sendMessage(
+            service,
+            reqMessage,
+            '"shutdown" command sent to client',
+            reply=reply,
+        )
     elif cmd["type"] == "logout":
         sio.emit("SD_LO:logout", "")
 
-        sendMessage(service, reqMessage, '"logout" command sent to client')
+        sendMessage(
+            service,
+            reqMessage,
+            '"logout" command sent to client',
+            reply=reply,
+        )
     elif cmd["type"] == "mac_address":
 
         def handleMacData(address: str):
@@ -134,6 +144,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                 service,
                 reqMessage,
                 f"Client MAC Address: {address}",
+                reply=reply,
             )
 
         sio.emit("MAC:info", "", callback=handleMacData)
@@ -150,6 +161,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     reqMessage,
                     "Client Screenshot",
                     attachments=[tmpImgFile],
+                    reply=reply,
                 )
 
             except Exception as e:
@@ -176,6 +188,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     reqMessage,
                     f'"{path}" directory',
                     attachments=[tmpTextFile],
+                    reply=reply,
                 )
             except Exception as e:
                 print(e)
@@ -208,6 +221,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                 service,
                 reqMessage,
                 resMessage,
+                reply=reply,
             )
 
         sio.emit(
@@ -235,7 +249,12 @@ def runCmd(service, sio, cmd: Command, reqMessage):
 
         def handleReceiveFileData(data: dict):
             if isinstance(data, dict) and "msg" in data:
-                sendMessage(service, reqMessage, data["msg"])
+                sendMessage(
+                    service,
+                    reqMessage,
+                    data["msg"],
+                    reply=reply,
+                )
                 return
 
             try:
@@ -249,6 +268,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     service,
                     reqMessage,
                     f'Cannot write "{filePath}" file to client',
+                    reply=reply,
                 )
                 return
 
@@ -271,6 +291,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                 service,
                 reqMessage,
                 resMessage,
+                reply=reply,
             )
 
         sio.emit("DIRECTORY:delete", path, callback=handleDeleteFileStatus)
@@ -298,6 +319,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     reqMessage,
                     "Client Process List",
                     attachments=[tmpTextFile],
+                    reply=reply,
                 )
             except Exception as e:
                 print(e)
@@ -328,6 +350,7 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     reqMessage,
                     "Client Application List",
                     attachments=[tmpTextFile],
+                    reply=reply,
                 )
             except Exception as e:
                 print(e)
@@ -349,12 +372,14 @@ def runCmd(service, sio, cmd: Command, reqMessage):
                     service,
                     reqMessage,
                     f"Process with PID {pid} killed",
+                    reply=reply,
                 )
             else:
                 sendMessage(
                     service,
                     reqMessage,
                     f"Process with PID {pid} not found",
+                    reply=reply,
                 )
 
         sio.emit("APP_PRO:kill", pid, callback=handleKillStatus)
@@ -367,6 +392,7 @@ class IndexPage(BasePage):
         super().__init__(tag)
         self.service = build("gmail", "v1", credentials=app.creds)
         self.fetchMaxEntries = 5
+        self.sendAsReply = True
 
         self.getData()
 
@@ -403,7 +429,20 @@ class IndexPage(BasePage):
 
     def render(self):
         with dpg.window(label="Mail Inbox", tag=self.tag, width=400, height=200):
-            dpg.add_text("Inbox")
+            with dpg.group(horizontal=True):
+                dpg.add_text("Inbox")
+
+                def handleFetchMaxEntriesClick(sender, app_data, user_data):
+                    self.fetchMaxEntries = int(app_data)
+                    self.handleRefreshClick()
+
+                dpg.add_combo(
+                    ("5", "10", "15", "20"),
+                    default_value=f"{self.fetchMaxEntries}",
+                    label="Last mails",
+                    width=100,
+                    callback=handleFetchMaxEntriesClick,
+                )
 
             with dpg.menu_bar():
                 with dpg.menu(label="Actions"):
@@ -412,6 +451,18 @@ class IndexPage(BasePage):
                     )
                     dpg.add_menu_item(
                         label="Exit", callback=lambda: dpg.stop_dearpygui()
+                    )
+
+                def handleSendAsReplyClick(sender, app_data, user_data):
+                    print("app_data", app_data)
+                    self.sendAsReply = not bool(app_data)
+
+                with dpg.menu(label="Settings"):
+                    dpg.add_menu_item(
+                        label="Send response as reply",
+                        check=True,
+                        default_value=self.sendAsReply,
+                        callback=handleSendAsReplyClick,
                     )
 
             for mail in self.mails:
@@ -446,6 +497,7 @@ class IndexPage(BasePage):
                                     app.sio,
                                     cmd,
                                     mail,
+                                    self.sendAsReply,
                                 )
                                 executor.shutdown(wait=False)
 
