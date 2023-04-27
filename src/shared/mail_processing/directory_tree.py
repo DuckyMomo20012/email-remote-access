@@ -102,6 +102,14 @@ def onCopyFileToClientMessage(service, sio, cmd: Command, reqMessage, reply=True
 
             with open(destPath + fileName, "wb") as f:
                 f.write(fileData)
+
+            sendMessage(
+                service,
+                reqMessage,
+                f'"{filePath}" file copied to client',
+                reply=reply,
+            )
+
         except Exception:
             sendMessage(
                 service,
