@@ -59,6 +59,10 @@ def main():
     dpg.start_dearpygui()
     dpg.destroy_context()
 
+    # NOTE: Have to call this manually so the program can exit after the window
+    # is closed
+    app.__del__()
+
 
 if __name__ == "__main__":
     main()
