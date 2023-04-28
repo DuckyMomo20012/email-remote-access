@@ -26,6 +26,8 @@ class IndexPage(BasePage):
         self.service = build("gmail", "v1", credentials=app.creds)
         self.fetchMaxEntries = 5
         self.sendAsReply = True
+        # NOTE: This is hardcoded for now
+        self.label = "INBOX"
 
         self.getData()
 
@@ -36,9 +38,12 @@ class IndexPage(BasePage):
         res = (
             self.service.users()
             .messages()
-            .list(userId="me", maxResults=maxEntries)
+            .list(userId="me", maxResults=maxEntries, labelIds=[self.label])
             .execute()
         )
+        if "messages" not in res:
+            return []
+
         messages = res["messages"]
 
         messagePayloads = []
@@ -52,6 +57,13 @@ class IndexPage(BasePage):
             messagePayloads.append(msg)
 
         return messagePayloads
+
+    def getLabels(self):
+        res = self.service.users().labels().list(userId="me").execute()
+        labels = res["labels"]
+
+        # BUG: Can't fetch messages from user's labels
+        return [label["name"] for label in labels if label["type"] != "user"]
 
     def getData(self):
         self.mails = self.fetchMail(maxEntries=self.fetchMaxEntries)
@@ -75,6 +87,18 @@ class IndexPage(BasePage):
                     label="Last mails",
                     width=100,
                     callback=handleFetchMaxEntriesClick,
+                )
+
+                def handleLabelClick(sender, app_data, user_data):
+                    self.label = app_data
+                    self.handleRefreshClick()
+
+                dpg.add_combo(
+                    self.getLabels(),
+                    default_value=self.label,
+                    label="Label",
+                    width=200,
+                    callback=handleLabelClick,
                 )
 
             with dpg.menu_bar():
@@ -140,12 +164,23 @@ class IndexPage(BasePage):
 
                             with dpg.group(horizontal=True):
                                 dpg.add_text(cmd)
-                                dpg.add_button(
+                                runBtn = dpg.add_button(
                                     label="Run",
                                     callback=handleCmdClick,
                                     # NOTE: A little trick to fix the late
                                     # binding problem
                                     user_data={
+                                        "cmd": cmd,
+                                        "mail": mail,
+                                    },
+                                )
+
+                            # NOTE: We "simulate" a click on the run button
+                            if cmd["autoRun"]:
+                                handleCmdClick(
+                                    runBtn,
+                                    None,
+                                    {
                                         "cmd": cmd,
                                         "mail": mail,
                                     },
