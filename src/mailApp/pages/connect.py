@@ -3,10 +3,10 @@ from typing import Callable, Optional, TypedDict, Union
 import dearpygui.dearpygui as dpg
 from socketio.exceptions import ConnectionError
 
-from src.mail.app import app
-from src.mail.pages.base import BasePage
-from src.mail.pages.error import ErrorWindow
-from src.mail.pages.index.index import IndexPage
+from src.mailApp.app import app
+from src.mailApp.pages.base import BasePage
+from src.mailApp.pages.error import ErrorWindow
+from src.mailApp.pages.index.index import IndexPage
 
 PORT = 5656
 
