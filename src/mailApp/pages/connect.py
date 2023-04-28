@@ -4,9 +4,9 @@ import dearpygui.dearpygui as dpg
 from socketio.exceptions import ConnectionError
 
 from src.mailApp.app import app
-from src.mailApp.pages.base import BasePage
-from src.mailApp.pages.error import ErrorWindow
 from src.mailApp.pages.index.index import IndexPage
+from src.shared.pages.base import BasePage
+from src.shared.pages.error import ErrorWindow
 
 PORT = 5656
 

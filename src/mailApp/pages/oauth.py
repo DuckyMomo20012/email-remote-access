@@ -9,7 +9,7 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from src.mailApp.app import app
-from src.mailApp.pages.base import BasePage
+from src.shared.pages.base import BasePage
 
 TOKEN_PATH = "token.json"
 
