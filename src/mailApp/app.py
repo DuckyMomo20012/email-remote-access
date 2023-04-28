@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 import socketio
 from google.oauth2.credentials import Credentials
 
-from src.mail.pages.base import BasePage
+from src.mailApp.pages.base import BasePage
 
 
 class App:
@@ -39,8 +39,8 @@ app = App()
 
 
 def main():
-    from src.mail.pages.connect import ConnectPage
-    from src.mail.pages.oauth import OAuthPage
+    from src.mailApp.pages.connect import ConnectPage
+    from src.mailApp.pages.oauth import OAuthPage
 
     dpg.create_context()
     dpg.create_viewport(title="Remote Control", width=1280, height=800)

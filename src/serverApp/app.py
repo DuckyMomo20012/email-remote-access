@@ -2,7 +2,7 @@ from typing import Union
 
 import dearpygui.dearpygui as dpg
 
-from src.mail.pages.base import BasePage
+from src.mailApp.pages.base import BasePage
 
 
 class App:

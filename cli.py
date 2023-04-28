@@ -4,7 +4,7 @@ import typer
 from environs import Env
 
 import src.client.app as clientApp
-import src.mail.app as mailApp
+import src.mailApp.app as mailApp
 import src.server.app as serverAppLegacy
 import src.server.mailServer as mailServer
 import src.serverApp.app as serverApp
