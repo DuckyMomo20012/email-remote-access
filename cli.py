@@ -4,9 +4,9 @@ import typer
 from environs import Env
 
 import src.clientApp.app as clientApp
+import src.legacy.serverApp.app as serverAppLegacy
 import src.mailApp.app as mailApp
 import src.mailServer.server as server
-import src.server.app as serverAppLegacy
 import src.serverApp.app as serverApp
 
 TService = Enum(  # type: ignore
