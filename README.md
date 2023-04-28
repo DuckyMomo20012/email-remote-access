@@ -1,5 +1,6 @@
 <div align="center">
 
+  <img src="https://user-images.githubusercontent.com/64480713/235120521-91065016-94a6-4d76-9514-7be3bf5f877c.svg" alt="logo" width="200" height="auto" />
   <h1>Email Remote Access</h1>
 
   <p>
@@ -59,10 +60,17 @@
   - [Client App](#client-app)
   - [Mail App](#mail-app)
     - [Authorize the app](#authorize-the-app)
+    - [Connect to the server](#connect-to-the-server)
     - [Send mail](#send-mail)
     - [Instruction format](#instruction-format)
     - [Supported instructions](#supported-instructions)
+    - [Fetch mail](#fetch-mail)
     - [Execute instructions](#execute-instructions)
+  - [Mail Server](#mail-server)
+    - [Authorization](#authorization)
+    - [Connect to the server](#connect-to-the-server-1)
+    - [Fetch mail](#fetch-mail-1)
+    - [Execute instructions](#execute-instructions-1)
   - [Dear PyGui Demo](#dear-pygui-demo)
   - [CLI](#cli)
 - [Roadmap](#compass-roadmap)
@@ -96,7 +104,7 @@
 - Mail App:
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/64480713/234620319-cc0a6ec3-00b4-41b5-928c-3133c5b7cdcf.png" alt="mail_app_screenshot" />
+  <img src="https://user-images.githubusercontent.com/64480713/235119738-5e3ebee9-9335-48b9-8e0c-16338f281477.png" alt="mail_app_screenshot" />
 </div>
 
 <!-- TechStack -->
@@ -127,52 +135,52 @@
 
 ### :dart: Features
 
-- **Client App:** A simple GUI app to control remote computer
+- **Client App:** A simple GUI app to control a remote computer
 
   - Shutdown/logout:
     - [x] Shutdown computer.
     - [x] Logout computer.
   - MAC address:
-    - [x] Get computer's MAC address.
-  - Livescreen:
+    - [x] Get the computer's MAC address.
+  - Live screen:
     - [x] Live stream computer's screen.
-    - [x] Save screenshot.
+    - [x] Save the screenshot.
   - Directory:
     - [x] List all files in a directory.
-    - [x] Copy files to client computer.
-    - [x] Copy files to server computer.
+    - [x] Copy files to the client computer.
+    - [x] Copy files to the server computer.
     - [x] Delete files.
   - App process:
     - [x] List all processes.
     - [x] List applications.
     - [x] Kill processes.
   - Registry:
-    - [x] Create registry key.
+    - [x] Create a registry key.
     - [x] Delete registry key.
     - [x] Get registry value.
     - [x] Set registry value.
 
-- **Mail App:** A simple GUI app to control remote computer using email
+- **Mail App:** A simple GUI app to control a remote computer using email
 
   - Shutdown/logout:
     - [x] Shutdown computer.
     - [x] Logout computer.
   - MAC address:
-    - [x] Get computer's MAC address.
-  - Livescreen:
+    - [x] Get the computer's MAC address.
+  - Live screen:
     - [ ] Live stream computer's screen. (Won't do)
-    - [x] Save screenshot.
+    - [x] Save the screenshot.
   - Directory:
     - [x] List all files in a directory.
-    - [x] Copy files to client computer.
-    - [x] Copy files to server computer.
+    - [x] Copy files to the client computer.
+    - [x] Copy files to the server computer.
     - [x] Delete files.
   - App process:
     - [x] List all processes.
     - [x] List applications.
     - [x] Kill processes.
   - Registry:
-    - [ ] Create registry key.
+    - [ ] Create a registry key.
     - [ ] Delete registry key.
     - [ ] Get registry value.
     - [ ] Set registry value.
@@ -302,6 +310,12 @@ Start the program:
   poe dev mail
   ```
 
+- **Mail Server:**
+
+  ```bash
+  poe dev server:mail
+  ```
+
 - **Dear PyGui Demo:**
 
   ```bash
@@ -314,6 +328,8 @@ Start the program:
 
 ### Server:
 
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
 You will have to start the server manually by running the
 `src/server/server.py`:
 
@@ -321,7 +337,14 @@ You will have to start the server manually by running the
 python src/server/server.py
 ```
 
+This will start an `uvicorn` server with port `5656` and with host `0.0.0.0`,
+which is **the IP address of your local machine**.
+
 ### Server App
+
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
+This app allows you to start and stop the [Server](#server) manually.
 
 Run the server:
 
@@ -338,23 +361,28 @@ poe dev server
 After the app starts, you will have to start the server manually by clicking the
 `Start server` button.
 
-The server will run on with port `5656` and with host `0.0.0.0`, which is **the
-IP address of your local machine**.
+The app will start the server from [Server](#server). The server still runs with
+port `5656` and with host `0.0.0.0`, which is the IP address of your local
+machine.
 
 To stop the server, click the `Stop server` button.
 
 <details>
 <summary>Behind the scene</summary>
 
-We you click the `Start server` button, the app will start an `uvicorn` server
-in different process, and store the process ID for later use.
+When you click the `Start server` button, the app will start an `uvicorn` server
+in **different process**, and store the process ID for later use.
 
-When you click the `Stop server` button, the app will find child process with
-the ID stored before and kill it, then terminate the parent process.
+When you click the `Stop server` button, the app will find child processes from
+the parent process the ID stored before and kill it, then terminate the parent
+process.
 
 </details>
 
 ### Client App
+
+This app will connect to the server and allow you to control the server machine
+with supported commands.
 
 Run the client app:
 
@@ -369,8 +397,13 @@ Connect to the server by entering the server's IP address and port:
 
 ### Mail App
 
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
+This app will connect to the server and allow you to control the server machine
+by running commands sent from email.
+
 > **Note**: To use this app, you need to provide the `credentials.json` file in
-> the root directory. Please follow the instructions in the page:
+> the root directory. Please follow the instructions on the page:
 > [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
 > to create your own App and download the `credentials.json` file.
 
@@ -391,57 +424,83 @@ After you log in, you will be asked to give the app permissions:
 - **Read all resources and their metadata—no write operations.**
 - **Send messages only. No read or modify privileges on mailbox.**
 
-The token will be saved in the file `token.json` in the `src/mail` directory.
+The token will be saved in the file `token.json` in the root directory of the
+project.
 
 > **Warning**: The file `credentials.json` and `token.json` are **sensitive
 > files**, **DO NOT** share them with anyone.
+
+#### Connect to the server
 
 Connect to the server by entering the server's IP address and port:
 
 - **IP address:** The IP address of your server machine.
 - **Port:** `5656`.
 
+The `Server` or `Server App` should be running before you run the `Mail App` to
+accept the connection.
+
 #### Send mail
 
-You can send an email to the address you logged in to the app.
-
-- Currently, the max number of emails that are fetched from the server is `5`.
+You can send an email to the address you logged in to the app. The instruction
+in the email MUST follow the [instruction format](#instruction-format).
 
 #### Instruction format
 
+The instruction in the email MUST follow the format:
+
+> **Note**: Each `instruction` doesn't have to be on a separate line.
+
 ```
-(<command>:<options>)
+<autoRun>(<type>:<options>)
 ```
 
-- **command**: The command to execute. The command is case-sensitive.
+- **autoRun**: Whether to run the command automatically after receiving the
+  email. The allowed values are `#`.
+
+  - If the value is `#`, the command will be executed automatically.
+  - If the value is empty, the command will be executed when you click the `Run`
+    button.
+
+  > **Note**: The `#` character must be exactly before the `(` character.
+
+- **type**: The type of command to execute. The type is **case-sensitive**. For
+  the list of supported commands, see
+  [Supported instructions](#supported-instructions).
 - **options**: The options of the command. The options are separated by `;`. The
-  allowed characters are alphanumeric characters, `\`, `:`, `;` and `.`.
+  allowed characters are alphanumeric characters, `\`, `:`, `;`, and `.`.
+  Currently, not support multiline options.
   > **Note**: The `options` is optional and can be omitted.
-
-> **Note**: Each `instruction` don't have to be on a separate line.
 
 E.g.:
 
 ```
+#(command) # run automatically
+# (command) # not run automatically
+
 (command) # without options
 (command:option1;option2) # with multiple options
-(command1:) # with empty option
+(command1:) # with an empty option
 (command1:)(command2) # multiple instructions on the same line
 ```
 
-  <details>
-  <summary>Regex pattern</summary>
+<details>
+<summary>Regex pattern</summary>
+
+The regex pattern is defined in the file `src/shared/mail_processing/utils.py`:
 
 ```python
 cmdPattern = "|".join(DEFAULT_COMMANDS)
-pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+pattern = (
+    rf"(?P<autoRun>#)?\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+)
 ```
 
-  </details>
+</details>
 
 #### Supported instructions
 
-- `shutdown`: Shutdown the server machine.
+- `shutdown`: Shut down the server machine.
 
   - Example:
 
@@ -477,7 +536,7 @@ pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
 
   - **Options**:
 
-    - `path`: The path to list.
+    - `path`: The path to the list.
 
   - Example:
 
@@ -487,6 +546,8 @@ pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
 
 - `copy_file_to_server`: Copy a file from the client machine to the server
   machine.
+
+  > **Warning**: The file size **MUST** be **less than 1MB**.
 
   - **Options**:
 
@@ -507,6 +568,8 @@ pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
 
 - `copy_file_to_client`: Copy a file from the server machine to the client
   machine.
+
+  > **Warning**: The file size **MUST** be **less than 1MB**.
 
   - **Options**:
 
@@ -566,16 +629,89 @@ pattern = rf"\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
     (kill_process:1234)
     ```
 
+#### Fetch mail:
+
+By default, the app will fetch `5` the latest emails from the `INBOX` label of
+the email account.
+
+- You can change the number of emails to change the `Last mails` dropdown.
+
+- You can change the label to fetch emails from the `Label` dropdown. User's
+  labels are not supported.
+
+If you want to refresh the email list, you can click the `Refresh` button in the
+`Actions` tab.
+
+When parsing the email, the app will try to get as much text from the email body
+as possible. The text will be parsed as instructions.
+
+- When parsing the instruction, the app will remove duplicate instructions.
+
 #### Execute instructions
 
 You can execute instructions by clicking the `Run` button on the right side of
 the parsed instructions from received messages.
 
-The result will be send back to the email sender. By default, the message will
+The result will be sent back to the email sender. By default, the message will
 be **sent as a reply** to the received message. The reply message may have
 attachments.
 
+To change the email reply type to a separate email, you can uncheck the setting:
+`Settings > Send response as reply`.
+
+> **Note**: There is a known issue when executing multiple instructions at the
+> same time, it will cause the SSL error. So please execute one instruction
+> after a short time (about ~2 seconds).
+
+### Mail Server
+
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
+This is the server that will do everything that the [Mail App](#mail-app) can
+do, but it will not have the GUI.
+
+Run the mail server:
+
+```bash
+poe dev server:mail
+```
+
+#### Authorization
+
+Like the [Mail App](#mail-app), the mail server will need to be authorized to be
+able to access the email account. Please follow the
+[Authorize the app](#authorize-the-app) section to authorize the app.
+
+#### Connect to the server
+
+The mail server will automatically connect to the server when it starts. The
+host will be `localhost` and the port will be `5656`. So **the server and the
+mail server MUST be run on the same machine**.
+
+#### Fetch mail
+
+By default, the mail server will **ONLY** fetch the `5` latest emails from the
+`INBOX` label. You will have to change the code to change the number of emails
+to fetch and the label to fetch.
+
+#### Execute instructions
+
+The mail server will **automatically execute the instructions** from the
+received emails.
+
+As the known issue mentioned in the [Mail App](#mail-app) section, the
+instruction shouldn't be executed at the same time. So the mail server will
+delay about `2` seconds before executing the next instructions.
+
+Each executed instruction will be logged to the file `tmp/log.txt` to prevent it
+from being executed again by checking the email's sent date.
+
 ### Dear PyGui Demo
+
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
+The demo will demonstrate all the features of the Dear PyGui library. This was
+for development purposes only.
 
 Run the demo:
 
@@ -583,19 +719,24 @@ Run the demo:
 poe dev demo
 ```
 
-The demo will demonstrate all the features of the Dear PyGui library.
-
 ### CLI
 
+[⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
+
 ```bash
-Usage: cli.py [OPTIONS] [SERVICE]:[server|server:legacy|client|mail]
+Usage: cli.py [OPTIONS]
+              [SERVICE]:[server|server:mail|server:legacy|client|mail]
 
 Arguments:
-  [SERVICE]:[server|server:legacy|client|mail]  Service to run  [default: server]
+  [SERVICE]:[server|server:mail|server:legacy|client|mail]
+                                  Service to run  [default: server]
 
 Options:
   --help  Show this message and exit.
 ```
+
+> **Note**: This is an entry point for all the services. Each service should be
+> run from this entry point to make the absolute import work.
 
 <!-- Roadmap -->
 
@@ -604,8 +745,8 @@ Options:
 - [x] Rebuild the server with `Dear PyGui`.
 - [ ] Rebuild the client app with `Dear PyGui`.
 - [x] Support more features for Mail App.
-  - [x] Copy files to client computer.
-  - [x] Copy files to server computer.
+  - [x] Copy files to the client computer.
+  - [x] Copy files to the server computer.
   - [x] Delete files.
 
 <!-- Contributing -->
@@ -633,11 +774,41 @@ Please read the
 
 - Why do you migrate to `Dear PyGui`?
 
-  - The server and client app are built with `tkinter`, which is a bit hard to
+  - The server and client app is built with `tkinter`, which is a bit hard to
     use and maintain. The `tkinter`'s `mainloop` is quite hard to close
-    manually, and it's not shutdown properly when the program is closed. So I
+    manually, and it's not shut down properly when the program is closed. So I
     decided to migrate to `Dear PyGui` for better UI and better dataflow
     management.
+
+- `Mail App` or `Mail Server` got an `HttpError: 403 Insufficient Permission`
+  error when trying to send the email.
+
+  - Make sure the file `token.json` is in the root directory of the project.
+
+  - Make sure the `token.json` file is created with these scopes:
+
+    ```
+    https://www.googleapis.com/auth/gmail.send
+    https://www.googleapis.com/auth/gmail.readonly
+    ```
+
+  - Make sure the `expiry` field in the `token.json` file is not expired. If it
+    is, you can restart the app to **refresh** the token.
+
+- Execute multiple instructions at the same time will cause the SSL error.
+
+  - There is a known issue when executing multiple instructions at the same
+    time, it will cause the SSL error. So please execute one instruction after a
+    short time (about ~2 seconds).
+
+- File size must be less than 1MB.
+
+  - The file size must be less than 1MB when copying files from client to server
+    or from server to client. This is the default `max_http_buffer_size` of the
+    [`AsyncServer`](https://python-socketio.readthedocs.io/en/latest/api.html#socketio.AsyncServer)
+    the
+    [`python-socketio`](https://python-socketio.readthedocs.io/en/latest/index.html)
+    library.
 
 <!-- License -->
 
