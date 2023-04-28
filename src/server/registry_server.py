@@ -177,12 +177,6 @@ def callbacks(sio: socketio.AsyncServer):
         v_type = msg["v_type"]
         res = ["0", "0"]
 
-        print(ID)
-        print(full_path)
-        print(name_value)
-        print(value)
-        print(v_type)
-
         # ID==0 run file.reg
         # path is detail of file .reg
         if ID == 0:
