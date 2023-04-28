@@ -28,6 +28,8 @@ LOG_FILE = "tmp/log.txt"
 
 DELAY_BETWEEN_RUNS = 2
 
+DEFAULT_BOX = "INBOX"
+
 
 class MailClient:
     sio: socketio.Client
@@ -86,7 +88,7 @@ class MailClient:
         res = (
             self.service.users()
             .messages()
-            .list(userId="me", maxResults=maxEntries)
+            .list(userId="me", maxResults=maxEntries, labelIds=[DEFAULT_BOX])
             .execute()
         )
         messages = res["messages"]
