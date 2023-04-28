@@ -3,7 +3,7 @@ from enum import Enum
 import typer
 from environs import Env
 
-import src.client.app as clientApp
+import src.clientApp.app as clientApp
 import src.mailApp.app as mailApp
 import src.mailServer.server as server
 import src.server.app as serverAppLegacy

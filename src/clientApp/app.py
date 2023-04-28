@@ -3,15 +3,15 @@ from tkinter import messagebox
 
 import socketio
 
-import src.client.app_process_client as ap
-import src.client.directory_tree_client as dt
-import src.client.entrance_ui as ui1
-import src.client.keylogger_client as kl
-import src.client.live_screen_client as lsc
-import src.client.mac_address_client as mac
-import src.client.main_ui as ui2
-import src.client.registry_client as rc
-import src.client.shutdown_logout_client as sl
+import src.clientApp.app_process_client as ap
+import src.clientApp.directory_tree_client as dt
+import src.clientApp.entrance_ui as ui1
+import src.clientApp.keylogger_client as kl
+import src.clientApp.live_screen_client as lsc
+import src.clientApp.mac_address_client as mac
+import src.clientApp.main_ui as ui2
+import src.clientApp.registry_client as rc
+import src.clientApp.shutdown_logout_client as sl
 from src.server.server import PORT
 
 
