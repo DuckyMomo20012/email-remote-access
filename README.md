@@ -1,5 +1,6 @@
 <div align="center">
 
+  <img src="https://user-images.githubusercontent.com/64480713/235120521-91065016-94a6-4d76-9514-7be3bf5f877c.svg" alt="logo" width="200" height="auto" />
   <h1>Email Remote Access</h1>
 
   <p>
@@ -103,7 +104,7 @@
 - Mail App:
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/64480713/234620319-cc0a6ec3-00b4-41b5-928c-3133c5b7cdcf.png" alt="mail_app_screenshot" />
+  <img src="https://user-images.githubusercontent.com/64480713/235119738-5e3ebee9-9335-48b9-8e0c-16338f281477.png" alt="mail_app_screenshot" />
 </div>
 
 <!-- TechStack -->
