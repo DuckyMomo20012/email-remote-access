@@ -19,6 +19,10 @@ class Command(TypedDict):
         "list_process",
         "list_application",
         "kill_process",
+        "create_registry_key",
+        "delete_registry_key",
+        "get_registry_value",
+        "set_registry_value",
     ]
     options: Optional[str]
     autoRun: bool
@@ -36,6 +40,10 @@ DEFAULT_COMMANDS = [
     "list_process",
     "list_application",
     "kill_process",
+    "create_registry_key",
+    "delete_registry_key",
+    "get_registry_value",
+    "set_registry_value",
 ]
 
 
