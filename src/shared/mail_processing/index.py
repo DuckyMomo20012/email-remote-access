@@ -12,6 +12,12 @@ from src.shared.mail_processing.directory_tree import (
 )
 from src.shared.mail_processing.live_screen import onScreenshotMessage
 from src.shared.mail_processing.mac_address import onMacAddressMessage
+from src.shared.mail_processing.registry import (
+    onCreateRegKey,
+    onDeleteRegKey,
+    onGetRegValue,
+    onSetRegValue,
+)
 from src.shared.mail_processing.shutdown_logout import (
     onLogoutMessage,
     onShutdownMessage,
@@ -30,6 +36,10 @@ cmdMapping = {
     "list_process": onListProcessMessage,
     "list_application": onListApplicationMessage,
     "kill_process": onKillProcessMessage,
+    "create_registry_key": onCreateRegKey,
+    "delete_registry_key": onDeleteRegKey,
+    "get_registry_value": onGetRegValue,
+    "set_registry_value": onSetRegValue,
 }
 
 
