@@ -180,10 +180,10 @@
     - [x] List applications.
     - [x] Kill processes.
   - Registry:
-    - [ ] Create a registry key.
-    - [ ] Delete registry key.
-    - [ ] Get registry value.
-    - [ ] Set registry value.
+    - [x] Create a registry key.
+    - [x] Delete registry key.
+    - [x] Get registry value.
+    - [x] Set registry value.
 
 <!-- Env Variables -->
 
@@ -445,6 +445,25 @@ accept the connection.
 You can send an email to the address you logged in to the app. The instruction
 in the email MUST follow the [instruction format](#instruction-format).
 
+Kitchen sink example:
+
+```
+(shutdown:)(logout)
+(mac_address)
+(screenshot)
+(list_directory:C:\Users\VINH\Desktop)
+(list_process:)
+(list_application)
+(kill_process:1234)
+(copy_file_to_server:C:\Users\VINH\Desktop\cli.py;C:\Users\VINH\Desktop\foo\)
+(copy_file_to_client:C:\Users\VINH\Desktop\cli.py;C:\Users\VINH\Desktop\bar\)
+(delete_file:C:\Users\VINH\Desktop\tmp.txt)
+(create_registry_key:HKEY_CURRENT_USER\Software\MyKey)
+(set_registry_value:HKEY_CURRENT_USER\Software\MyKey;foo;bar;REG_SZ)
+(get_registry_value:HKEY_CURRENT_USER\Software\MyKey;foo)
+(delete_registry_key:HKEY_CURRENT_USER\Software\MyKey)
+```
+
 #### Instruction format
 
 The instruction in the email MUST follow the format:
@@ -455,8 +474,8 @@ The instruction in the email MUST follow the format:
 <autoRun>(<type>:<options>)
 ```
 
-- **autoRun**: Whether to run the command automatically after receiving the
-  email. The allowed values are `#`.
+- `autoRun`: Whether to run the command automatically after receiving the email.
+  The allowed values are `#`.
 
   - If the value is `#`, the command will be executed automatically.
   - If the value is empty, the command will be executed when you click the `Run`
@@ -464,12 +483,14 @@ The instruction in the email MUST follow the format:
 
   > **Note**: The `#` character must be exactly before the `(` character.
 
-- **type**: The type of command to execute. The type is **case-sensitive**. For
+- `type`: The type of command to execute. The type is **case-sensitive**. For
   the list of supported commands, see
   [Supported instructions](#supported-instructions).
-- **options**: The options of the command. The options are separated by `;`. The
+
+- `options`: The options of the command. The options are separated by `;`. The
   allowed characters are alphanumeric characters, `\`, `:`, `;`, and `.`.
-  Currently, not support multiline options.
+  Currently, **not support multiline options**.
+
   > **Note**: The `options` is optional and can be omitted.
 
 E.g.:
@@ -627,6 +648,68 @@ pattern = (
 
     ```
     (kill_process:1234)
+    ```
+
+- `create_registry_key`: Create a registry key on the server machine.
+
+  - **Options**:
+
+    - `keyPath`: The key path to create.
+
+  - Example:
+
+    ```
+    (create_registry_key:HKEY_CURRENT_USER\Software\MyKey)
+    ```
+
+- `delete_registry_key`: Delete a registry key on the server machine.
+
+  - **Options**:
+
+    - `keyPath`: The key path to delete.
+
+  - Example:
+
+    ```
+    (delete_registry_key:HKEY_CURRENT_USER\Software\MyKey)
+    ```
+
+- `set_registry_value`: Set a registry value on the server machine.
+
+  - **Options**:
+
+    - `keyPath`: The key path to set the value.
+    - `valueName`: The name of the value to set.
+    - `valueData`: The data of the value to set.
+    - `valueType`: The type of the value to set. The value type is
+      **case-sensitive**.
+      - The supported value types are:
+        - `REG_SZ`.
+        - `REG_BINARY`.
+        - `REG_DWORD`.
+        - `REG_QWORD`.
+        - `REG_EXPAND_SZ`.
+      - The unsupported value types are:
+        - `REG_MULTI_SZ` ([instruction](#instruction-format)'s `options` doesn't
+          support multiline options).
+
+  - Example:
+
+    ```
+    (set_registry_value:HKEY_CURRENT_USER\Software\MyKey;MyValue;Hello;REG_SZ)
+    ```
+
+- `get_registry_value`: Get a registry value on the server machine.
+
+  - **Options**:
+
+    - `keyPath`: The key path to get the value.
+    - `valueName`: The name of the value to get.
+
+  - Example:
+
+    ```
+    (set_registry_value:HKEY_CURRENT_USER\Software\MyKey;MyValue)
     ```
 
 #### Fetch mail:
