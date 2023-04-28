@@ -5,8 +5,8 @@ from environs import Env
 
 import src.client.app as clientApp
 import src.mailApp.app as mailApp
+import src.mailServer.server as server
 import src.server.app as serverAppLegacy
-import src.server.mailServer as mailServer
 import src.serverApp.app as serverApp
 
 TService = Enum(  # type: ignore
@@ -32,7 +32,7 @@ def main(service: TService = typer.Argument("server", help="Service to run")):
     if str(service) == "Service.server":
         serverApp.main()
     elif str(service) == "Service.server:mail":
-        mailServer.main()
+        server.main()
     elif str(service) == "Service.server:legacy":
         serverAppLegacy.main()
     elif str(service) == "Service.client":
