@@ -41,6 +41,9 @@ class IndexPage(BasePage):
             .list(userId="me", maxResults=maxEntries, labelIds=[self.label])
             .execute()
         )
+        if "messages" not in res:
+            return []
+
         messages = res["messages"]
 
         messagePayloads = []
