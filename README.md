@@ -134,52 +134,52 @@
 
 ### :dart: Features
 
-- **Client App:** A simple GUI app to control remote computer
+- **Client App:** A simple GUI app to control a remote computer
 
   - Shutdown/logout:
     - [x] Shutdown computer.
     - [x] Logout computer.
   - MAC address:
-    - [x] Get computer's MAC address.
-  - Livescreen:
+    - [x] Get the computer's MAC address.
+  - Live screen:
     - [x] Live stream computer's screen.
-    - [x] Save screenshot.
+    - [x] Save the screenshot.
   - Directory:
     - [x] List all files in a directory.
-    - [x] Copy files to client computer.
-    - [x] Copy files to server computer.
+    - [x] Copy files to the client computer.
+    - [x] Copy files to the server computer.
     - [x] Delete files.
   - App process:
     - [x] List all processes.
     - [x] List applications.
     - [x] Kill processes.
   - Registry:
-    - [x] Create registry key.
+    - [x] Create a registry key.
     - [x] Delete registry key.
     - [x] Get registry value.
     - [x] Set registry value.
 
-- **Mail App:** A simple GUI app to control remote computer using email
+- **Mail App:** A simple GUI app to control a remote computer using email
 
   - Shutdown/logout:
     - [x] Shutdown computer.
     - [x] Logout computer.
   - MAC address:
-    - [x] Get computer's MAC address.
-  - Livescreen:
+    - [x] Get the computer's MAC address.
+  - Live screen:
     - [ ] Live stream computer's screen. (Won't do)
-    - [x] Save screenshot.
+    - [x] Save the screenshot.
   - Directory:
     - [x] List all files in a directory.
-    - [x] Copy files to client computer.
-    - [x] Copy files to server computer.
+    - [x] Copy files to the client computer.
+    - [x] Copy files to the server computer.
     - [x] Delete files.
   - App process:
     - [x] List all processes.
     - [x] List applications.
     - [x] Kill processes.
   - Registry:
-    - [ ] Create registry key.
+    - [ ] Create a registry key.
     - [ ] Delete registry key.
     - [ ] Get registry value.
     - [ ] Set registry value.
@@ -336,8 +336,8 @@ You will have to start the server manually by running the
 python src/server/server.py
 ```
 
-This will an `uvicorn` server with port `5656` and with host `0.0.0.0`, which is
-**the IP address of your local machine**.
+This will start an `uvicorn` server with port `5656` and with host `0.0.0.0`,
+which is **the IP address of your local machine**.
 
 ### Server App
 
@@ -369,11 +369,12 @@ To stop the server, click the `Stop server` button.
 <details>
 <summary>Behind the scene</summary>
 
-We you click the `Start server` button, the app will start an `uvicorn` server
+When you click the `Start server` button, the app will start an `uvicorn` server
 in **different process**, and store the process ID for later use.
 
-When you click the `Stop server` button, the app will find child process with
-the ID stored before and kill it, then terminate the parent process.
+When you click the `Stop server` button, the app will find child processes from
+the parent process the ID stored before and kill it, then terminate the parent
+process.
 
 </details>
 
@@ -401,7 +402,7 @@ This app will connect to the server and allow you to control the server machine
 by running commands sent from email.
 
 > **Note**: To use this app, you need to provide the `credentials.json` file in
-> the root directory. Please follow the instructions in the page:
+> the root directory. Please follow the instructions on the page:
 > [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
 > to create your own App and download the `credentials.json` file.
 
@@ -466,7 +467,7 @@ The instruction in the email MUST follow the format:
   the list of supported commands, see
   [Supported instructions](#supported-instructions).
 - **options**: The options of the command. The options are separated by `;`. The
-  allowed characters are alphanumeric characters, `\`, `:`, `;` and `.`.
+  allowed characters are alphanumeric characters, `\`, `:`, `;`, and `.`.
   Currently, not support multiline options.
   > **Note**: The `options` is optional and can be omitted.
 
@@ -478,7 +479,7 @@ E.g.:
 
 (command) # without options
 (command:option1;option2) # with multiple options
-(command1:) # with empty option
+(command1:) # with an empty option
 (command1:)(command2) # multiple instructions on the same line
 ```
 
@@ -498,7 +499,7 @@ pattern = (
 
 #### Supported instructions
 
-- `shutdown`: Shutdown the server machine.
+- `shutdown`: Shut down the server machine.
 
   - Example:
 
@@ -534,7 +535,7 @@ pattern = (
 
   - **Options**:
 
-    - `path`: The path to list.
+    - `path`: The path to the list.
 
   - Example:
 
@@ -629,8 +630,8 @@ pattern = (
 
 #### Fetch mail:
 
-By default, the app will fetch `5` latest emails from the `INBOX` label of the
-email account.
+By default, the app will fetch `5` the latest emails from the `INBOX` label of
+the email account.
 
 - You can change the number of emails to change the `Last mails` dropdown.
 
@@ -640,8 +641,8 @@ email account.
 If you want to refresh the email list, you can click the `Refresh` button in the
 `Actions` tab.
 
-When parsing the email, the app will try to get as many the text from the email
-body as possible. The text will be parsed as instructions.
+When parsing the email, the app will try to get as much text from the email body
+as possible. The text will be parsed as instructions.
 
 - When parsing the instruction, the app will remove duplicate instructions.
 
@@ -650,14 +651,14 @@ body as possible. The text will be parsed as instructions.
 You can execute instructions by clicking the `Run` button on the right side of
 the parsed instructions from received messages.
 
-The result will be send back to the email sender. By default, the message will
+The result will be sent back to the email sender. By default, the message will
 be **sent as a reply** to the received message. The reply message may have
 attachments.
 
-To change the email reply type to separate email, you can uncheck the setting:
+To change the email reply type to a separate email, you can uncheck the setting:
 `Settings > Send response as reply`.
 
-> **Note**: There is known issue when executing multiple instructions in the
+> **Note**: There is a known issue when executing multiple instructions at the
 > same time, it will cause the SSL error. So please execute one instruction
 > after a short time (about ~2 seconds).
 
@@ -688,7 +689,7 @@ mail server MUST be run on the same machine**.
 
 #### Fetch mail
 
-By default, the mail server will **ONLY** fetch `5` latest emails from the
+By default, the mail server will **ONLY** fetch the `5` latest emails from the
 `INBOX` label. You will have to change the code to change the number of emails
 to fetch and the label to fetch.
 
@@ -698,7 +699,7 @@ The mail server will **automatically execute the instructions** from the
 received emails.
 
 As the known issue mentioned in the [Mail App](#mail-app) section, the
-instruction shouldn't be executed in the same time. So the mail server will
+instruction shouldn't be executed at the same time. So the mail server will
 delay about `2` seconds before executing the next instructions.
 
 Each executed instruction will be logged to the file `tmp/log.txt` to prevent it
@@ -709,7 +710,7 @@ from being executed again by checking the email's sent date.
 [⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
 
 The demo will demonstrate all the features of the Dear PyGui library. This was
-for development purpose only.
+for development purposes only.
 
 Run the demo:
 
@@ -734,7 +735,7 @@ Options:
 ```
 
 > **Note**: This is an entry point for all the services. Each service should be
-> run from this entry point to make the absolute import works.
+> run from this entry point to make the absolute import work.
 
 <!-- Roadmap -->
 
@@ -743,8 +744,8 @@ Options:
 - [x] Rebuild the server with `Dear PyGui`.
 - [ ] Rebuild the client app with `Dear PyGui`.
 - [x] Support more features for Mail App.
-  - [x] Copy files to client computer.
-  - [x] Copy files to server computer.
+  - [x] Copy files to the client computer.
+  - [x] Copy files to the server computer.
   - [x] Delete files.
 
 <!-- Contributing -->
@@ -772,14 +773,14 @@ Please read the
 
 - Why do you migrate to `Dear PyGui`?
 
-  - The server and client app are built with `tkinter`, which is a bit hard to
+  - The server and client app is built with `tkinter`, which is a bit hard to
     use and maintain. The `tkinter`'s `mainloop` is quite hard to close
-    manually, and it's not shutdown properly when the program is closed. So I
+    manually, and it's not shut down properly when the program is closed. So I
     decided to migrate to `Dear PyGui` for better UI and better dataflow
     management.
 
-- `Mail App` or `Mail Server` got `HttpError: 403 Insufficient Permission` error
-  when trying to send email.
+- `Mail App` or `Mail Server` got an `HttpError: 403 Insufficient Permission`
+  error when trying to send the email.
 
   - Make sure the file `token.json` is in the root directory of the project.
 
@@ -793,11 +794,11 @@ Please read the
   - Make sure the `expiry` field in the `token.json` file is not expired. If it
     is, you can restart the app to **refresh** the token.
 
-- Execute multiple instructions in the same time will cause the SSL error.
+- Execute multiple instructions at the same time will cause the SSL error.
 
-  - There is known issue when executing multiple instructions in the same time,
-    it will cause the SSL error. So please execute one instruction after a short
-    time (about ~2 seconds).
+  - There is a known issue when executing multiple instructions at the same
+    time, it will cause the SSL error. So please execute one instruction after a
+    short time (about ~2 seconds).
 
 - File size must be less than 1MB.
 
