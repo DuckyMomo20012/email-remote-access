@@ -6,7 +6,7 @@ import psutil
 
 import src.server.server as server
 from src.server.server import PORT
-from src.serverApp.pages.base import BasePage
+from src.shared.pages.base import BasePage
 
 
 class IndexPage(BasePage):

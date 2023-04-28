@@ -5,10 +5,10 @@ import dearpygui.dearpygui as dpg
 from googleapiclient.discovery import build
 
 from src.mailApp.app import app
-from src.mailApp.pages.base import BasePage
-from src.mailApp.pages.error import ErrorWindow
 from src.shared.mail_processing.index import runCmd
 from src.shared.mail_processing.utils import Command, parseCmd
+from src.shared.pages.base import BasePage
+from src.shared.pages.error import ErrorWindow
 from src.utils.mail import parseMail
 
 
