@@ -56,7 +56,7 @@ def parseCmd(msg: str) -> list[Command]:
     # increase the matching accuracy. The `\\`, `:`, `.` was included in the
     # options for the file path. The `;` was included for splitting options.
     pattern = (
-        rf"(?P<autoRun>#)?\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
+        rf"(?P<autoRun>#|!)?\((?P<type>{cmdPattern})(?:\:(?P<options>[\w\\:;\.]*))?\)"
     )
 
     result = re.finditer(pattern, msg)
@@ -66,12 +66,17 @@ def parseCmd(msg: str) -> list[Command]:
     for match in result:
         autoRun, type, options = match.group("autoRun", "type", "options")
 
+        if autoRun == "#":
+            autoRunVal = True
+        elif autoRun == "!":
+            autoRunVal = False
+        else:
+            autoRunVal = False
+
         newCmd = cast(
             Command,
             {
-                # NOTE: We can use bool(autoRun) as the `#` will be `True`. But
-                # it's better to be explicit
-                "autoRun": autoRun is not None,
+                "autoRun": autoRunVal,
                 "type": type,
                 "options": options,
             },
