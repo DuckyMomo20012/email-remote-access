@@ -8,6 +8,7 @@ from src.shared.mail_processing.app_process import (
 )
 from src.shared.mail_processing.directory_tree import (
     onCopyFileToClientMessage,
+    onCopyFileToClientStreamMessage,
     onCopyFileToServerMessage,
     onDeleteFileMessage,
     onListDirectoryMessage,
@@ -34,6 +35,7 @@ cmdMapping = {
     "list_directory": onListDirectoryMessage,
     "copy_file_to_server": onCopyFileToServerMessage,
     "copy_file_to_client": onCopyFileToClientMessage,
+    "copy_file_to_client_stream": onCopyFileToClientStreamMessage,
     "delete_file": onDeleteFileMessage,
     "list_process": onListProcessMessage,
     "list_application": onListApplicationMessage,

@@ -5,6 +5,8 @@ import socketio
 
 SEPARATOR = "<SEPARATOR>"
 
+BUFSIZE = 1000 * 1000  # 1MB
+
 
 def showTree():
     listD = []
@@ -100,6 +102,29 @@ def callbacks(sio: socketio.AsyncServer):
         if status:
             return {"filename": os.path.basename(filePath), "fileData": fileData}
         else:
+            return {"msg": "Cannot copy file"}
+
+    @sio.on("DIRECTORY:copy:stream")
+    async def on_dir_copy_stream(sid, filePath: str):
+        if not os.path.isfile(filePath):
+            return {"msg": "File not found"}
+
+        try:
+            with open(filePath, "rb") as f:
+                while True:
+                    data = f.read(BUFSIZE)
+                    if data == b"":
+                        break
+                    await sio.emit(
+                        "DIRECTORY:copy:stream:data",
+                        {"filename": os.path.basename(filePath), "fileData": data},
+                        to=sid,
+                    )
+                    # NOTE: Delay to prevent from packet loss
+                    await sio.sleep(0.5)
+                await sio.emit("DIRECTORY:copy:stream:done", "")
+            return {"msg": "OK"}
+        except Exception:
             return {"msg": "Cannot copy file"}
 
     @sio.on("DIRECTORY:delete")
