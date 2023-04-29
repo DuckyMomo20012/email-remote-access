@@ -132,6 +132,91 @@ def onCopyFileToClientMessage(
     sio.emit("DIRECTORY:receive", filePath, callback=handleReceiveFileData)
 
 
+def onCopyFileToClientStreamMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
+    if not cmd["options"]:
+        raise Exception("No file path or destination path specified")
+        return
+
+    filePath, destPath = cmd["options"].split(";")
+
+    if not filePath:
+        raise Exception("No file path specified")
+        return
+
+    if not os.path.exists(filePath):
+        raise Exception(f'"{filePath}" file not found')
+        return
+
+    @sio.on("DIRECTORY:copy:stream:data")
+    def handleReceiveFileData(data: dict):
+        fileName = data["filename"]
+        fileData = data["fileData"]
+
+        with open(destPath + fileName, "ab") as f:
+            f.write(fileData)
+            # NOTE: Flush is needed to write data to file immediately
+            f.flush()
+
+    @sio.on("DIRECTORY:copy:stream:done")
+    def handleReceiveFileDone(data):
+        pass
+        # sendMessage(
+        #     service,
+        #     reqMessage,
+        #     f'"{filePath}" file copied to client',
+        #     reply=reply,
+        # )
+
+    sio.emit("DIRECTORY:copy:stream", filePath)
+
+
+def onCopyFileToServerStreamMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
+    if not cmd["options"]:
+        raise Exception("No file path or destination path specified")
+        return
+
+    filePath, destPath = cmd["options"].split(";")
+
+    if not filePath:
+        raise Exception("No file path specified")
+        return
+
+    if not os.path.exists(filePath):
+        raise Exception(f'"{filePath}" file not found')
+        return
+
+    @sio.on("DIRECTORY:copyto:stream:data")
+    def handleReceiveFileData(data: dict):
+        fileName = data["filename"]
+        fileData = data["fileData"]
+
+        with open(destPath + fileName, "ab") as f:
+            f.write(fileData)
+            # NOTE: Flush is needed to write data to file immediately
+            f.flush()
+
+    @sio.on("DIRECTORY:copyto:stream:done")
+    def handleReceiveFileDone(data):
+        sendMessage(
+            service,
+            reqMessage,
+            f'"{filePath}" file copied to client',
+            reply=reply,
+        )
+
+    sio.emit(
+        "DIRECTORY:copyto:stream",
+        {
+            "metadata": f"{filePath}{SEPARATOR}{destPath}",
+            "data": open(filePath, "rb").read(),
+        },
+    )
+
+
 def onDeleteFileMessage(
     service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
 ):
