@@ -1,7 +1,11 @@
+import socketio
+
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onShutdownMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onShutdownMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     sio.emit("SD_LO:shutdown", "")
 
     sendMessage(
@@ -12,7 +16,9 @@ def onShutdownMessage(service, sio, cmd: Command, reqMessage, reply=True):
     )
 
 
-def onLogoutMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onLogoutMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     sio.emit("SD_LO:logout", "")
 
     sendMessage(

@@ -1,12 +1,15 @@
 import os
 import uuid
 
+import socketio
 import tabulate
 
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onListProcessMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onListProcessMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     def handleProcessData(data: list[list]):
         [procName, procId, threadCount] = data
 
@@ -38,7 +41,9 @@ def onListProcessMessage(service, sio, cmd: Command, reqMessage, reply=True):
     sio.emit("APP_PRO:list", "", callback=handleProcessData)
 
 
-def onListApplicationMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onListApplicationMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     def handleAppData(data: list[list]):
         [appName, procId, threadCount] = data
 
@@ -70,7 +75,9 @@ def onListApplicationMessage(service, sio, cmd: Command, reqMessage, reply=True)
     sio.emit("APP_PRO:list:app", "", callback=handleAppData)
 
 
-def onKillProcessMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onKillProcessMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     if not cmd["options"]:
         raise Exception("No PID specified")
         return

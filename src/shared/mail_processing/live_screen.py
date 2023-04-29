@@ -1,10 +1,14 @@
 import os
 import uuid
 
+import socketio
+
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onScreenshotMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onScreenshotMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     def handleScreenshotData(data: bytes):
         try:
             tmpImgFile = f"screenshot_{uuid.uuid4()}.png"

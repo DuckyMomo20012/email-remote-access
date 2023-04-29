@@ -1,9 +1,11 @@
 import json
 
+import socketio
+
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onCreateRegKey(service, sio, cmd: Command, reqMessage, reply=True):
+def onCreateRegKey(service, sio: socketio.Client, cmd: Command, reqMessage, reply=True):
     if not cmd["options"]:
         raise Exception("No registry key specified")
         return
@@ -41,7 +43,7 @@ def onCreateRegKey(service, sio, cmd: Command, reqMessage, reply=True):
     )
 
 
-def onDeleteRegKey(service, sio, cmd: Command, reqMessage, reply=True):
+def onDeleteRegKey(service, sio: socketio.Client, cmd: Command, reqMessage, reply=True):
     if not cmd["options"]:
         raise Exception("No registry key specified")
         return
@@ -79,7 +81,7 @@ def onDeleteRegKey(service, sio, cmd: Command, reqMessage, reply=True):
     )
 
 
-def onSetRegValue(service, sio, cmd: Command, reqMessage, reply=True):
+def onSetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply=True):
     if not cmd["options"]:
         raise Exception("No information specified")
         return
@@ -122,7 +124,7 @@ def onSetRegValue(service, sio, cmd: Command, reqMessage, reply=True):
     )
 
 
-def onGetRegValue(service, sio, cmd: Command, reqMessage, reply=True):
+def onGetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply=True):
     if not cmd["options"]:
         raise Exception("No information specified")
         return
