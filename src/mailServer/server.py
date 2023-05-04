@@ -127,6 +127,9 @@ class MailClient:
                     parsedCmd = parseCmd(parsedMail["body"])
 
                     for cmd in parsedCmd:
+                        if not cmd["autoRun"]:
+                            continue
+
                         result = runCmd(self.service, self.sio, cmd, mail)
                         # NOTE: Don't spam the server
                         self.sio.sleep(DELAY_BETWEEN_RUNS)
