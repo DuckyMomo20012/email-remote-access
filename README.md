@@ -445,7 +445,7 @@ accept the connection.
 You can send an email to the address you logged in to the app. The instruction
 in the email MUST follow the [instruction format](#instruction-format).
 
-Kitchen sink example:
+**Kitchen sink example**
 
 ```
 (shutdown:)(logout)
@@ -523,6 +523,12 @@ pattern = (
 
 - `shutdown`: Shut down the server machine.
 
+  - **Instruction**:
+
+    ```
+    (shutdown)
+    ```
+
   - Example:
 
     ```
@@ -530,6 +536,12 @@ pattern = (
     ```
 
 - `logout`: Log out the current user.
+
+  - **Instruction**:
+
+    ```
+    (logout)
+    ```
 
   - Example:
 
@@ -539,6 +551,12 @@ pattern = (
 
 - `mac_address`: Get the MAC address of the server machine.
 
+  - **Instruction**:
+
+    ```
+    (mac_address)
+    ```
+
   - Example:
 
     ```
@@ -546,6 +564,12 @@ pattern = (
     ```
 
 - `screenshot`: Take a screenshot of the server machine.
+
+  - **Instruction**:
+
+    ```
+    (screenshot)
+    ```
 
   - Example:
 
@@ -555,7 +579,11 @@ pattern = (
 
 - `list_directory`: List directories and files in the given path.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (list_directory:<path>)
+    ```
 
     - `path`: The path to the list.
 
@@ -570,10 +598,15 @@ pattern = (
 
   > **Warning**: The file size **MUST** be **less than 1MB**.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (copy_file_to_server:<srcPath>;<destPath>)
+    ```
 
     - `srcPath`: The path to the file on the client machine.
     - `destPath`: The **directory** path to the file on the server machine.
+
       > **Note**: The file name from `srcPath` will be appended to the
       > `destPath`.
 
@@ -592,7 +625,11 @@ pattern = (
 
   > **Warning**: The file size **MUST** be **less than 1MB**.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (copy_file_to_client:<srcPath>;<destPath>)
+    ```
 
     - `srcPath`: The path to the file on the server machine.
     - `destPath`: The **directory** path to the file on the client machine.
@@ -612,7 +649,11 @@ pattern = (
 
 - `delete_file`: Delete a file on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (delete_file:<path>)
+    ```
 
     - `path`: The path to the file on the server machine.
 
@@ -624,6 +665,12 @@ pattern = (
 
 - `list_process`: List all the processes on the server machine.
 
+  - **Instruction**:
+
+    ```
+    (list_process)
+    ```
+
   - Example:
 
     ```
@@ -631,6 +678,12 @@ pattern = (
     ```
 
 - `list_application`: List all the applications on the server machine.
+
+  - **Instruction**:
+
+    ```
+    (list_application)
+    ```
 
   - Example:
 
@@ -640,7 +693,11 @@ pattern = (
 
 - `kill_process`: Kill a process on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (kill_process:<pid>)
+    ```
 
     - `pid`: The process ID of the process to kill.
 
@@ -652,7 +709,11 @@ pattern = (
 
 - `create_registry_key`: Create a registry key on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (create_registry_key:<keyPath>)
+    ```
 
     - `keyPath`: The key path to create.
 
@@ -664,7 +725,11 @@ pattern = (
 
 - `delete_registry_key`: Delete a registry key on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (delete_registry_key:<keyPath>)
+    ```
 
     - `keyPath`: The key path to delete.
 
@@ -676,7 +741,11 @@ pattern = (
 
 - `set_registry_value`: Set a registry value on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (set_registry_value:<keyPath>;<valueName>;<valueData>;<valueType>)
+    ```
 
     - `keyPath`: The key path to set the value.
     - `valueName`: The name of the value to set.
@@ -701,7 +770,11 @@ pattern = (
 
 - `get_registry_value`: Get a registry value on the server machine.
 
-  - **Options**:
+  - **Instruction**:
+
+    ```
+    (get_registry_value:<keyPath>;<valueName>)
+    ```
 
     - `keyPath`: The key path to get the value.
     - `valueName`: The name of the value to get.
@@ -714,8 +787,8 @@ pattern = (
 
 #### Fetch mail:
 
-By default, the app will fetch `5` the latest emails from the `INBOX` label of
-the email account.
+By default, the app will fetch `5` latest emails from the `INBOX` label of the
+email account.
 
 - You can change the number of emails to change the `Last mails` dropdown.
 
@@ -787,7 +860,7 @@ instruction shouldn't be executed at the same time. So the mail server will
 delay about `2` seconds before executing the next instructions.
 
 Each executed instruction will be logged to the file `tmp/log.txt` to prevent it
-from being executed again by checking the email's sent date.
+from being executed again by **checking the email's sent date**.
 
 ### Dear PyGui Demo
 
