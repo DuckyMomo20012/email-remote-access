@@ -111,8 +111,7 @@ class IndexPage(BasePage):
                     )
 
                 def handleSendAsReplyClick(sender, app_data, user_data):
-                    print("app_data", app_data)
-                    self.sendAsReply = not bool(app_data)
+                    self.sendAsReply = bool(app_data)
 
                 with dpg.menu(label="Settings"):
                     dpg.add_menu_item(
