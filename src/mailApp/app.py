@@ -43,7 +43,7 @@ def main():
     from src.mailApp.pages.oauth import OAuthPage
 
     dpg.create_context()
-    dpg.create_viewport(title="Remote Control", width=1280, height=800)
+    dpg.create_viewport(title="Remote Control", width=800, height=600)
 
     with dpg.font_registry():
         # First argument ids the path to the .ttf or .otf file
