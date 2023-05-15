@@ -1,7 +1,11 @@
+import socketio
+
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onMacAddressMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onMacAddressMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     def handleMacData(address: str):
         sendMessage(
             service,

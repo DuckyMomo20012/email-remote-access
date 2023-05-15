@@ -1,4 +1,6 @@
 # REVIEW: This is a bit messy, we should refactor this later
+import socketio
+
 from src.shared.mail_processing.app_process import (
     onKillProcessMessage,
     onListApplicationMessage,
@@ -43,7 +45,7 @@ cmdMapping = {
 }
 
 
-def runCmd(service, sio, cmd: Command, reqMessage, reply=True):
+def runCmd(service, sio: socketio.Client, cmd: Command, reqMessage, reply=True):
     try:
         if cmd["type"] in cmdMapping:
             cmdHandler = cmdMapping[cmd["type"]]

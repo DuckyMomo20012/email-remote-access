@@ -46,6 +46,17 @@ class OAuthPage(BasePage):
             show=False,
         )
 
+        if not os.path.exists(CREDENTIALS_PATH):
+            dpg.set_value(
+                "t_oauth_status",
+                (
+                    "Credentials file not found. Please add it to the root directory of"
+                    " application."
+                ),
+            )
+
+            return
+
         # The file token.json stores the user's access and refresh tokens, and
         # is created automatically when the authorization flow completes for the
         # first time.
@@ -102,6 +113,7 @@ class OAuthPage(BasePage):
 
                     dpg.set_value("t_oauth_status", "Authorized")
                     dpg.configure_item("b_redirect", show=True)
+                    dpg.configure_item("b_auth_url", show=False)
 
                 with ThreadPool(processes=1) as pool:
                     # REVIEW: Exception can't be caught here, so we have to

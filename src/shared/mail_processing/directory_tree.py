@@ -1,11 +1,15 @@
 import os
 import uuid
 
+import socketio
+
 from src.server.directory_tree_server import SEPARATOR
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
-def onListDirectoryMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onListDirectoryMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     if not cmd["options"]:
         raise Exception("No path specified")
         return
@@ -33,7 +37,9 @@ def onListDirectoryMessage(service, sio, cmd: Command, reqMessage, reply=True):
     sio.emit("DIRECTORY:list_dirs:pretty", path, callback=handleDirectoryData)
 
 
-def onCopyFileToServerMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onCopyFileToServerMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     if not cmd["options"]:
         raise Exception("No file path or destination path specified")
         return
@@ -71,7 +77,9 @@ def onCopyFileToServerMessage(service, sio, cmd: Command, reqMessage, reply=True
     )
 
 
-def onCopyFileToClientMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onCopyFileToClientMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     if not cmd["options"]:
         raise Exception("No file path or destination path specified")
         return
@@ -122,7 +130,9 @@ def onCopyFileToClientMessage(service, sio, cmd: Command, reqMessage, reply=True
     sio.emit("DIRECTORY:copy", filePath, callback=handleReceiveFileData)
 
 
-def onDeleteFileMessage(service, sio, cmd: Command, reqMessage, reply=True):
+def onDeleteFileMessage(
+    service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
+):
     if not cmd["options"]:
         raise Exception("No file path specified")
         return
