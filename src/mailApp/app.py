@@ -21,18 +21,24 @@ class App:
             page.__del__()
 
     def goto(self, page: BasePage):
-        if len(self.histories) > 0:
-            dpg.configure_item(self.histories[-1].tag, show=False)
-        page.render()
-        # NOTE: Tag can be re-assigned while rendering
-        self.histories.append(page)
+        try:
+            if len(self.histories) > 0:
+                dpg.configure_item(self.histories[-1].tag, show=False)
+            page.render()
+            # NOTE: Tag can be re-assigned while rendering
+            self.histories.append(page)
 
-        dpg.set_primary_window(page.tag, True)
+            dpg.set_primary_window(page.tag, True)
+        except SystemError:
+            print(
+                "RuntimeError: Cannot set primary window. Please check if the window is"
+                " created with self.tag"
+            )
 
     def back(self):
         if len(self.histories) > 1:
             prevPage = self.histories.pop()
-            dpg.delete_item(prevPage.tag)
+            prevPage.__del__()
             dpg.configure_item(self.histories[-1].tag, show=True)
 
 
@@ -59,10 +65,6 @@ def main():
     dpg.show_viewport()
     dpg.start_dearpygui()
     dpg.destroy_context()
-
-    # NOTE: Have to call this manually so the program can exit after the window
-    # is closed
-    app.__del__()
 
 
 if __name__ == "__main__":
