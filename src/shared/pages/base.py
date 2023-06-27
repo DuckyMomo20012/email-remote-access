@@ -12,6 +12,9 @@ class BasePage:
         else:
             self.tag = tag
 
+    def __del__(self):
+        dpg.delete_item(self.tag)
+
     def reload(self, isPrimary: bool = True):
         dpg.delete_item(self.tag)
         self.render()

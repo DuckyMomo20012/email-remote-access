@@ -1,5 +1,3 @@
-from typing import Union
-
 import dearpygui.dearpygui as dpg
 import socketio
 from google.oauth2.credentials import Credentials
@@ -9,7 +7,7 @@ from src.shared.pages.base import BasePage
 
 class App:
     sio: socketio.Client
-    histories: list[Union[int, str]]
+    histories: list[BasePage]
     creds: Credentials = None
 
     def __init__(self):
@@ -19,20 +17,23 @@ class App:
     def __del__(self):
         self.sio.disconnect()
 
+        for page in self.histories:
+            page.__del__()
+
     def goto(self, page: BasePage):
         if len(self.histories) > 0:
-            dpg.configure_item(self.histories[-1], show=False)
+            dpg.configure_item(self.histories[-1].tag, show=False)
         page.render()
         # NOTE: Tag can be re-assigned while rendering
-        self.histories.append(page.tag)
+        self.histories.append(page)
 
         dpg.set_primary_window(page.tag, True)
 
     def back(self):
         if len(self.histories) > 1:
             prevPage = self.histories.pop()
-            dpg.delete_item(prevPage)
-            dpg.configure_item(self.histories[-1], show=True)
+            dpg.delete_item(prevPage.tag)
+            dpg.configure_item(self.histories[-1].tag, show=True)
 
 
 app = App()
