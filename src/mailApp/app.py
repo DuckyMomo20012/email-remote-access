@@ -17,9 +17,6 @@ class App:
     def __del__(self):
         self.sio.disconnect()
 
-        for page in self.histories:
-            page.__del__()
-
     def goto(self, page: BasePage):
         try:
             if len(self.histories) > 0:
