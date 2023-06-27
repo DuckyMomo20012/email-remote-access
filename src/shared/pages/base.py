@@ -13,13 +13,25 @@ class BasePage:
             self.tag = tag
 
     def __del__(self):
-        dpg.delete_item(self.tag)
+        try:
+            dpg.delete_item(self.tag)
+        except RuntimeError:
+            print(
+                "RuntimeError: Cannot set primary window. Please check if the window is"
+                " created with self.tag"
+            )
 
     def reload(self, isPrimary: bool = True):
-        dpg.delete_item(self.tag)
-        self.render()
-        if isPrimary:
-            dpg.set_primary_window(self.tag, True)
+        try:
+            dpg.delete_item(self.tag)
+            self.render()
+            if isPrimary:
+                dpg.set_primary_window(self.tag, True)
+        except SystemError:
+            print(
+                "RuntimeError: Cannot set primary window. Please check if the window is"
+                " created with self.tag"
+            )
 
     def render(self):
         dpg.add_window(label="Base Page", tag=self.tag)
