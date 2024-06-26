@@ -158,7 +158,7 @@ class Registry_UI(Canvas):
         ]
         try:
             t_num = int(self.data_type_txt.get("1.0", "end").rstrip())
-            if 0 <= t_num and t_num <= 5:
+            if t_num >= 0 and t_num <= 5:
                 self.data_type = dtypes[t_num]
             else:
                 self.data_type = dtypes[0]
@@ -198,7 +198,7 @@ class Registry_UI(Canvas):
             return
         self.content.delete("1.0", "end")
         s = ""
-        with open(file, "r") as input_file:
+        with open(file) as input_file:
             s = input_file.read()
         for line in s:
             self.content.insert(tk.END, line)
