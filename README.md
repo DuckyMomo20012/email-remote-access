@@ -227,6 +227,12 @@ variables.
   Read more about installation on
   [Poetry documentation](https://python-poetry.org/docs/master/#installation).
 
+- Tkinter:
+
+  ```bash
+  sudo apt-get install python3-tk
+  ```
+
 <!-- Run Locally -->
 
 ### :running: Run Locally
