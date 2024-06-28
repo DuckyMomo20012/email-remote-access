@@ -2,11 +2,13 @@ from typing import Union
 
 import dearpygui.dearpygui as dpg
 
+from src.newClientApp.pages.index.list_dir import ListDirWindow
 from src.newClientApp.pages.index.list_process import ListProcessWindow
 from src.shared.pages.base import BasePage
 
 windows: dict[str, BasePage] = {
     "/proc": ListProcessWindow,
+    "/dir": ListDirWindow,
 }
 
 
@@ -59,7 +61,12 @@ class IndexPage(BasePage):
                         "/proc", parent=w, sender=sender
                     ),
                 )
-                dpg.add_button(label="List directory")
+                dpg.add_button(
+                    label="List directory",
+                    callback=lambda sender: self.assignWindow(
+                        "/dir", parent=w, sender=sender
+                    ),
+                )
                 dpg.add_button(label="Registry")
                 dpg.add_button(label="Live screen")
                 dpg.add_button(label="Shut down")
