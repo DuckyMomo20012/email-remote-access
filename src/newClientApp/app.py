@@ -50,7 +50,7 @@ class App:
     def back(self):
         if len(self.histories) > 1:
             prevPage = self.histories.pop()
-            prevPage.__del__()
+            dpg.delete_item(prevPage.tag)
             dpg.configure_item(self.histories[-1].tag, show=True)
 
     def callbacks(self):
