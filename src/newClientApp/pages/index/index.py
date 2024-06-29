@@ -11,9 +11,11 @@ windows: dict[str, BasePage] = {
 
 
 class IndexPage(BasePage):
+    prevWindow: BasePage | None
+
     def __init__(self, tag: Union[int, str] = "w_index"):
         super().__init__(tag)
-        self.prevWindow: Union[int, str] = ""
+        self.prevWindow = None
         self.prevButton: Union[int, str] = ""
 
     def assignWindow(self, route: str, parent: Union[int, str], sender):
@@ -25,10 +27,12 @@ class IndexPage(BasePage):
 
             w = w(parent=parent)
 
-            if self.prevWindow != "" and self.prevButton != "":
+            if self.prevWindow is not None and self.prevButton != "":
                 dpg.configure_item(self.prevButton, enabled=True)
-                dpg.delete_item(self.prevWindow)
-            self.prevWindow = w.tag
+                if dpg.does_item_exist(self.prevWindow.tag):
+                    dpg.delete_item(self.prevWindow.tag)
+                self.prevWindow.deActive()
+            self.prevWindow = w
             self.prevButton = sender
             dpg.configure_item(self.prevButton, enabled=False)
 
