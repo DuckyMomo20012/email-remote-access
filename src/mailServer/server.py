@@ -115,12 +115,12 @@ class MailClient:
                 date = parsedMail["date"]
 
                 if os.path.exists(LOG_FILE):
-                    with open(LOG_FILE, "r") as f:
+                    with open(LOG_FILE) as f:
                         if date in f.read():
                             continue
                 else:
                     os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-                    open(LOG_FILE, "w")
+                    open(LOG_FILE, "w")  # noqa: SIM115
 
                 parsedCmd = []
                 if parsedMail["body"] is not None:

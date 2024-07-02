@@ -1,3 +1,5 @@
+import sys
+
 import socketio
 import uvicorn
 from fastapi import FastAPI
@@ -7,7 +9,6 @@ import src.server.app_process_server as ap
 import src.server.directory_tree_server as dt
 import src.server.live_screen_server as lss
 import src.server.mac_address_server as mac
-import src.server.registry_server as rs
 import src.server.shutdown_logout_server as sl
 
 PORT = 5656
@@ -47,8 +48,11 @@ lss.callbacks(sio)
 # Register directory tree events
 dt.callbacks(sio)
 
-# Register registry events
-rs.callbacks(sio)
+if "nt" in sys.builtin_module_names:
+    import src.server.registry_server as rs
+
+    # Register registry events
+    rs.callbacks(sio)
 
 
 @sio.on("QUIT")

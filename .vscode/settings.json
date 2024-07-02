@@ -61,8 +61,8 @@
   "diffEditor.experimental.showMoves": true,
   "editor.bracketPairColorization.enabled": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.fixAll": "explicit"
+    "source.fixAll": "explicit",
+    "source.fixAll.eslint": "explicit"
   },
   "editor.cursorSmoothCaretAnimation": "on",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -115,6 +115,9 @@
     "scminput": false,
     "yaml": true
   },
+  "go.alternateTools": {
+    "go": "/home/vinh/.asdf/shims/go"
+  },
   "go.lintTool": "golangci-lint",
   "go.toolsManagement.autoUpdate": true,
   "gopls": {
@@ -141,9 +144,14 @@
     "default": "right",
     "jupyter-notebook": "left"
   },
+  "notebook.defaultFormatter": "charliermarsh.ruff",
   "notebook.lineNumbers": "on",
   "prettier.proseWrap": "always",
   "prisma.showPrismaDataPlatformNotification": false,
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.diagnosticMode": "workspace",
+  "python.analysis.typeCheckingMode": "standard",
+  "python.languageServer": "Pylance",
   "redhat.telemetry.enabled": false,
   // Rewrap Extension
   "rewrap.autoWrap.enabled": true,
