@@ -3,8 +3,6 @@ from enum import Enum
 import typer
 from environs import Env
 
-import src.clientApp.app as clientApp
-import src.legacy.serverApp.app as serverAppLegacy
 import src.mailApp.app as mailApp
 import src.mailServer.server as server
 import src.newClientApp.app as newClientApp
@@ -35,10 +33,6 @@ def main(service: TService = typer.Argument("server", help="Service to run")):  
         serverApp.main()
     elif str(service) == "Service.server:mail":
         server.main()
-    elif str(service) == "Service.server:legacy":
-        serverAppLegacy.main()
-    elif str(service) == "Service.client":
-        clientApp.main()
     elif str(service) == "Service.mail":
         mailApp.main()
     elif str(service) == "Service.client:new":
