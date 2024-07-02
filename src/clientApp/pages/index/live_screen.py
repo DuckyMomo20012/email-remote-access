@@ -7,7 +7,7 @@ import dearpygui.dearpygui as dpg
 import numpy as np
 from PIL import Image, ImageGrab
 
-from src.newClientApp.app import app
+from src.clientApp.app import app
 from src.shared.pages.base import BasePage
 
 

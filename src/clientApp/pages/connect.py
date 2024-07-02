@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 import socketio
 import socketio.exceptions
 
-from src.newClientApp.app import app
+from src.clientApp.app import app
 from src.server.server import PORT
 from src.shared.pages.base import BasePage
 
