@@ -4,6 +4,7 @@ import dearpygui.dearpygui as dpg
 
 from src.newClientApp.pages.index.list_dir import ListDirWindow
 from src.newClientApp.pages.index.list_process import ListProcessWindow
+from src.newClientApp.pages.index.live_screen import LiveScreenWindow
 from src.newClientApp.pages.index.reg_editor import RegistryEditorWindow
 from src.shared.pages.base import BasePage
 
@@ -11,6 +12,7 @@ windows: dict[str, BasePage] = {
     "/proc": ListProcessWindow,
     "/dir": ListDirWindow,
     "/reg_editor": RegistryEditorWindow,
+    "/live_screen": LiveScreenWindow,
 }
 
 
@@ -75,7 +77,12 @@ class IndexPage(BasePage):
                         "/reg_editor", parent=w, sender=sender
                     ),
                 )
-                dpg.add_button(label="Live screen")
+                dpg.add_button(
+                    label="Live screen",
+                    callback=lambda sender: self.assignWindow(
+                        "/live_screen", parent=w, sender=sender
+                    ),
+                )
                 dpg.add_button(label="Shut down")
                 dpg.add_button(label="Logout")
 
