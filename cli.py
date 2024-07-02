@@ -3,9 +3,9 @@ from enum import Enum
 import typer
 from environs import Env
 
+import src.clientApp.app as clientApp
 import src.mailApp.app as mailApp
 import src.mailServer.server as server
-import src.newClientApp.app as newClientApp
 import src.serverApp.app as serverApp
 
 TService = Enum(  # type: ignore
@@ -35,8 +35,8 @@ def main(service: TService = typer.Argument("server", help="Service to run")):  
         server.main()
     elif str(service) == "Service.mail":
         mailApp.main()
-    elif str(service) == "Service.client:new":
-        newClientApp.main()
+    elif str(service) == "Service.client":
+        clientApp.main()
 
 
 if __name__ == "__main__":

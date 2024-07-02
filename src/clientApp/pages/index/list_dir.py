@@ -4,7 +4,7 @@ from typing import Literal, Union
 
 import dearpygui.dearpygui as dpg
 
-from src.newClientApp.app import app
+from src.clientApp.app import app
 from src.server.directory_tree_server import SEPARATOR
 from src.shared.pages.base import BasePage
 from src.shared.pages.popup import PopupWindow

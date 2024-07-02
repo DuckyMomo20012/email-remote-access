@@ -3,7 +3,7 @@ from typing import Union
 
 import dearpygui.dearpygui as dpg
 
-from src.newClientApp.app import app
+from src.clientApp.app import app
 from src.shared.pages.base import BasePage
 from src.shared.pages.popup import PopupWindow
 

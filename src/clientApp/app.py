@@ -21,7 +21,7 @@ class App:
 
     def goto(self, route: str):
         try:
-            from src.newClientApp.routes import routes
+            from src.clientApp.routes import routes
 
             page = routes.get(route)
 

@@ -2,11 +2,11 @@ from typing import Union
 
 import dearpygui.dearpygui as dpg
 
-from src.newClientApp.app import app
-from src.newClientApp.pages.index.list_dir import ListDirWindow
-from src.newClientApp.pages.index.list_process import ListProcessWindow
-from src.newClientApp.pages.index.live_screen import LiveScreenWindow
-from src.newClientApp.pages.index.reg_editor import RegistryEditorWindow
+from src.clientApp.app import app
+from src.clientApp.pages.index.list_dir import ListDirWindow
+from src.clientApp.pages.index.list_process import ListProcessWindow
+from src.clientApp.pages.index.live_screen import LiveScreenWindow
+from src.clientApp.pages.index.reg_editor import RegistryEditorWindow
 from src.shared.pages.base import BasePage
 from src.shared.pages.confirm import ConfirmWindow
 
