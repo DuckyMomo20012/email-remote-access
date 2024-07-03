@@ -8,8 +8,8 @@ from fastapi import FastAPI
 import src.server.app_process_server as ap
 import src.server.directory_tree_server as dt
 import src.server.live_screen_server as lss
-import src.server.mac_address_server as mac
 import src.server.shutdown_logout_server as sl
+import src.server.sys_info_server as sys_info
 
 PORT = 5656
 
@@ -22,22 +22,11 @@ sio = socketio.AsyncServer(async_mode="asgi", cors_allowed_origins="*", logger=T
 app = socketio.ASGIApp(sio, api)
 
 
-# @api.get("/")
-# async def index():
-#     return "Hello World"
-
-
-@sio.on("KEYLOG:start")
-def keylogger(sid):
-    # kl.keylog(sio)
-    return
-
-
 # Register shutdown and logout events
 sl.callbacks(sio)
 
-# Register MAC address events
-mac.callbacks(sio)
+# Register system info events
+sys_info.callbacks(sio)
 
 # Register app process events
 ap.callbacks(sio)
