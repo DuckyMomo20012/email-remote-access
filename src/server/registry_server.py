@@ -1,5 +1,6 @@
 import re
 import winreg
+from binascii import hexlify
 
 import socketio
 
@@ -89,10 +90,11 @@ def setValue(path: str, valueName: str, dataType: str, value):
 
         if dataType == "REG_BINARY":
             # NOTE: Convert string to hex then to bytes
-            value = bytes.fromhex(hex(int(value, 16)).removeprefix("0x"))
+            value = hexlify(value.encode())
         elif dataType == "REG_DWORD" or dataType == "REG_QWORD":
             value = int(value)
         elif dataType == "REG_MULTI_SZ":
+            # Ref: https://stackoverflow.com/a/53396459/12512981
             value = list(value.split("\n"))
 
         winreg.SetValueEx(key, valueName, 0, getattr(winreg, dataType), value)
@@ -103,25 +105,27 @@ def setValue(path: str, valueName: str, dataType: str, value):
         return None, {"message": "Invalid registry data value"}
     except OverflowError:
         return None, {"message": "Data value is too large"}
+    except ValueError:
+        return None, {"message": "Invalid data value"}
 
     return path, None
 
 
 def callbacks(sio: socketio.AsyncServer):
     @sio.on("REGISTRY:create_key")
-    def create_key(data):
+    def create_key(sid, data):
         return createKey(data["path"])
 
     @sio.on("REGISTRY:delete_key")
-    def delete_key(data):
+    def delete_key(sid, data):
         return deleteKey(data["path"])
 
     @sio.on("REGISTRY:get_value")
-    def get_value(data):
+    def get_value(sid, data):
         return getValue(data["path"], data["valueName"], data["expand"])
 
     @sio.on("REGISTRY:set_value")
-    def set_value(data):
+    def set_value(sid, data):
         return setValue(
             data["path"], data["valueName"], data["dataType"], data["value"]
         )

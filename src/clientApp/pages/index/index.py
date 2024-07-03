@@ -9,6 +9,7 @@ from src.clientApp.pages.index.live_screen import LiveScreenWindow
 from src.clientApp.pages.index.reg_editor import RegistryEditorWindow
 from src.shared.pages.base import BasePage
 from src.shared.pages.confirm import ConfirmWindow
+from src.shared.pages.popup import PopupWindow
 
 windows: dict[str, BasePage] = {
     "/proc": ListProcessWindow,
@@ -52,15 +53,24 @@ class IndexPage(BasePage):
             print("ValueError: Route is not found")
 
     def fetchInfo(self):
-        def handleMessage(data):
-            dpg.set_value("mac_address", f"MAC Address: {data}")
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(err["message"], "Error")
 
-        app.sio.emit("MAC:info", "", callback=handleMessage)
+            dpg.set_value("mac_address", f"MAC Address: {data["macAddress"]}")
+            # NOTE: Add padding so it won't shift when the value changes
+            dpg.set_value("cpu", f"CPU: {data["cpu"]}%".ljust(10, " "))
+            dpg.set_value("memory", f"Memory: {data["memory"]}".ljust(10, " "))
+
+        app.sio.emit("SYS:info", "", callback=handleMessage)
 
     def render(self):
         with dpg.window(label="Home", tag=self.tag, width=400, height=200):
             with dpg.group(horizontal=True):
                 dpg.add_text(tag="mac_address")
+                dpg.add_text(tag="cpu")
+                dpg.add_text(tag="memory")
+                dpg.add_button(label="Refresh", callback=self.fetchInfo)
 
             g_body = dpg.add_group(horizontal=True)
 
