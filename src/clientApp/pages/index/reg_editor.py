@@ -1,4 +1,3 @@
-import json
 from typing import Union
 
 import dearpygui.dearpygui as dpg
@@ -65,6 +64,75 @@ class RegistryEditorWindow(BasePage):
             dpg.set_value("data_val", self.dataVal)
             dpg.set_value("data_type_val", self.dataTypeVal)
 
+    def handleCreateKey(self, path: str):
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(err["message"], "Error")
+                return
+
+            PopupWindow(f"Create key {data} successfully", "Success")
+
+        app.sio.emit(
+            "REGISTRY:create_key",
+            {
+                "path": path,
+            },
+            callback=handleMessage,
+        )
+
+    def handleDeleteKey(self, path: str):
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(err["message"], "Error")
+                return
+
+            PopupWindow(f"Delete key {data} successfully", "Success")
+
+        app.sio.emit(
+            "REGISTRY:delete_key",
+            {
+                "path": path,
+            },
+            callback=handleMessage,
+        )
+
+    def handleGetValue(self, path: str, valueName: str, expand: bool = False):
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(err["message"], "Error")
+                return
+
+            PopupWindow(f"Value {valueName} is: " + str(data), "Success")
+
+        app.sio.emit(
+            "REGISTRY:get_value",
+            {
+                "path": path,
+                "valueName": valueName,
+                "expand": expand,
+            },
+            callback=handleMessage,
+        )
+
+    def handleSetValue(self, path: str, valueName: str, dataType: str, value):
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(err["message"], "Error")
+                return
+
+            PopupWindow(f"Set value for {valueName} successfully", "Success")
+
+        app.sio.emit(
+            "REGISTRY:set_value",
+            {
+                "path": path,
+                "valueName": valueName,
+                "dataType": dataType,
+                "value": value,
+            },
+            callback=handleMessage,
+        )
+
     def handleSubmitClick(self):
         actionId = actionMap[self.action]
         # NOTE: Closure to get the current value of the input
@@ -73,35 +141,14 @@ class RegistryEditorWindow(BasePage):
         dataVal = self.dataVal
         dataTypeVal = self.dataTypeVal
 
-        msg = {
-            "ID": actionId,
-            "path": keyVal,
-            "name_value": nameVal,
-            "value": dataVal,
-            "v_type": dataTypeVal,
-        }
-        msg = json.dumps(msg)
-        msg_bytes = bytes(msg, "utf8")
-
-        def handleMessage(data: tuple[str, str]):
-            [res1, res2] = data
-
-            if res1 == "0":
-                PopupWindow("Something wrong happened", "Error")
-                return
-
-            if actionId == 1 and res2 != "0":
-                PopupWindow(
-                    f"Value {nameVal} is: " + str(res2), "Success", autoClose=False
-                )
-            elif actionId == 2:
-                PopupWindow(f"Set value for {nameVal} successfully", "Success")
-            elif actionId == 3:
-                PopupWindow(f"Create key {keyVal} successfully", "Success")
-            elif actionId == 4:
-                PopupWindow(f"Delete key {keyVal} successfully", "Success")
-
-        app.sio.emit("REGISTRY:edit", msg_bytes, callback=handleMessage)
+        if actionId == 1:
+            self.handleGetValue(keyVal, nameVal)
+        elif actionId == 2:
+            self.handleSetValue(keyVal, nameVal, dataTypeVal, dataVal)
+        elif actionId == 3:
+            self.handleCreateKey(keyVal)
+        elif actionId == 4:
+            self.handleDeleteKey(keyVal)
 
     def handleDataTypeClick(self, sender, app_data, user_data):
         self.dataTypeVal = app_data
@@ -151,6 +198,7 @@ class RegistryEditorWindow(BasePage):
                 dpg.add_input_text(
                     label="Key",
                     tag="key_val",
+                    hint="HKEY_CURRENT_USER\\Software\\ExampleKey",
                     enabled=False,
                     callback=lambda sender, app_data: self.__setattr__(
                         "keyVal", app_data
