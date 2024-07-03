@@ -1,111 +1,102 @@
 import os
+from typing import TypedDict
 
+import psutil
 import seedir
 import socketio
 
-SEPARATOR = "<SEPARATOR>"
+
+class SendDataRequest(TypedDict):
+    fileName: str
+    destPath: str
+    data: bytes
 
 
-def showTree():
-    listD = []
-    for c in range(ord("A"), ord("Z") + 1):
-        path = chr(c) + ":\\"
-        if os.path.isdir(path):
-            listD.append(path)
-    return listD
+def listDisk():
+    disks = psutil.disk_partitions(all=False)
+
+    return [disk.device for disk in disks], None
 
 
-def listDirs(path: str):
-    if not os.path.isdir(path):
-        return [False, path]
-
+def listDir(path: str):
     try:
-        listT = []
-        listD = os.listdir(path)
-        for d in listD:
-            listT.append((d, os.path.isdir(path + "\\" + d)))
+        if not os.path.isdir(path):
+            return None, {"message": "Invalid path"}
 
-        return [True, listT]
-    except Exception:
-        return [False, None]
-
-
-def delFile(path: str):
-    if os.path.exists(path):
-        try:
-            os.remove(path)
-            return True
-        except Exception:
-            return False
-    else:
-        return False
+        return [
+            (dirName, os.path.isdir(os.path.join(path, dirName)))
+            for dirName in os.listdir(path)
+        ], None
+    except PermissionError as err:
+        return None, {"message": f"Permission Denied: {err}"}
 
 
-# copy file from client to server
-def copyFileToServer(metadata: str, data: bytes):
-    [filePath, destPath] = metadata.split(SEPARATOR)
-    filename = os.path.basename(filePath)
+def listDirPretty(path: str):
     try:
-        with open(destPath + filename, "wb") as f:
+        # NOTE: r is for raw string, to prevent invalid path
+        tree_dir = seedir.seedir(rf"{path}", printout=False, style="emoji")
+
+        return tree_dir, None
+    except PermissionError as err:
+        return None, {"message": f"Permission Denied: {err}"}
+
+
+def writeFile(fileName: str, desPath: str, data: bytes):
+    try:
+        with open(os.path.join(desPath, fileName), "wb") as f:
             f.write(data)
-        return True
-    except Exception:
-        return False
+
+            return fileName, None
+
+    except OSError as err:
+        return None, {"message": f"Cannot write file: {err}"}
 
 
-# copy file from server to client
-def copyFileToClient(filename):
-    if not os.path.isfile(filename):
-        return [False, None]
-    with open(filename, "rb") as f:
-        data = f.read()
-        return [True, data]
+def readFile(filePath: str):
+    if not os.path.isfile(filePath):
+        return None, {"message": "File not found"}
+
+    try:
+        with open(filePath, "rb") as f:
+            data = f.read()
+            return {"fileName": os.path.basename(filePath), "data": data}, None
+    except OSError as err:
+        return None, {"message": f"Cannot read file: {err}"}
+
+
+def deleteFile(path: str):
+    if not os.path.isfile(path):
+        return None, {"message": "File not found"}
+
+    try:
+        os.remove(path)
+        return os.path.basename(path), None
+
+    except OSError as err:
+        return None, {"message": f"Cannot delete file: {err}"}
 
 
 def callbacks(sio: socketio.AsyncServer):
-    @sio.on("DIRECTORY:show_tree")
+    @sio.on("DIRECTORY:list_disk")
     def on_show_tree(sid, data):
-        return showTree()
+        return listDisk()
 
     @sio.on("DIRECTORY:list_dirs")
     def on_list_dirs(sid, path: str):
-        [status, dirs] = listDirs(path)
-
-        if status:
-            return dirs
-        else:
-            return {"msg": "Directory not found"}
+        return listDir(path)
 
     @sio.on("DIRECTORY:list_dirs:pretty")
-    async def on_list_dirs_pretty(sid, path: str):
-        try:
-            # NOTE: r is for raw string, to prevent invalid path
-            tree_dir = seedir.seedir(rf"{path}", printout=False, style="emoji")
+    def on_list_dirs_pretty(sid, path: str):
+        return listDirPretty(path)
 
-            return tree_dir
-        except PermissionError:
-            return {"msg": "Permission Denied"}
+    @sio.on("DIRECTORY:send")
+    def on_dir_copyto(sid, data: SendDataRequest):
+        return writeFile(data["fileName"], data["destPath"], data["data"])
 
-    @sio.on("DIRECTORY:copyto")
-    def on_dir_copyto(sid, data: dict):
-        copyFileStatus = copyFileToServer(data["metadata"], data["data"])
-        if copyFileStatus:
-            return "OK"
-        else:
-            return "NOT OK"
-
-    @sio.on("DIRECTORY:copy")
+    @sio.on("DIRECTORY:receive")
     def on_dir_copy(sid, filePath: str):
-        [status, fileData] = copyFileToClient(filePath)
-        if status:
-            return {"filename": os.path.basename(filePath), "fileData": fileData}
-        else:
-            return {"msg": "Cannot copy file"}
+        return readFile(filePath)
 
     @sio.on("DIRECTORY:delete")
     def on_dir_delete(sid, filePath: str):
-        delStatus = delFile(filePath)
-        if delStatus:
-            return "OK"
-        else:
-            return "NOT OK"
+        return deleteFile(filePath)

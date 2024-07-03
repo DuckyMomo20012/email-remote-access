@@ -1,207 +1,127 @@
-import json
-import os
 import re
 import winreg
 
 import socketio
 
+regKeyList = [
+    "HKEY_LOCAL_MACHINE",
+    "HKEY_CURRENT_USER",
+    "HKEY_CLASSES_ROOT",
+    "HKEY_USERS",
+]
+regDataTypeList = [
+    "REG_SZ",
+    "REG_EXPAND_SZ",
+    "REG_BINARY",
+    "REG_DWORD",
+    "REG_QWORD",
+    "REG_MULTI_SZ",
+]
+# NOTE: Mapping data type string to constant int
+regDataTypeMapping = dict(
+    [[str(getattr(winreg, dataType)), dataType] for dataType in regDataTypeList]
+)
 
-def parse_data(full_path):
+
+def extractPath(path: str):
+    # NOTE: Create a regex string that combines all the keys in regKeyMapping
+    reKey = rf"{"|".join(regKeyList)}"
+    keyType = re.match(reKey, path)
+    if keyType is None:
+        return None, None
+
+    # NOTE: Extract the path from the full path and remove the first backslash
+    subPath = re.sub(reKey, "", path).removeprefix("\\")
+
+    return keyType.group(), subPath
+
+
+def createKey(path: str):
+    keyType, subPath = extractPath(path)
+    if keyType is None:
+        return None, {"message": "Invalid registry key"}
+
+    winreg.CreateKey(getattr(winreg, keyType), subPath)
+
+    return path, None
+
+
+def deleteKey(path: str):
+    keyType, subPath = extractPath(path)
+    if keyType is None or subPath is None:
+        return None, {"message": "Invalid registry key"}
+
+    winreg.DeleteKey(getattr(winreg, keyType), subPath)
+
+    return path, None
+
+
+def getValue(path: str, valueName: str, expand=False):
+    keyType, subPath = extractPath(path)
+    if keyType is None or subPath is None:
+        return None, {"message": "Invalid registry key"}
+
     try:
-        full_path = re.sub(r"/", r"\\", full_path)
-        hive = re.sub(r"\\.*$", "", full_path)
-        if not hive:
-            raise ValueError("Invalid 'full_path' param.")
-        if len(hive) <= 4:
-            if hive == "HKLM":
-                hive = "HKEY_LOCAL_MACHINE"
-            elif hive == "HKCU":
-                hive = "HKEY_CURRENT_USER"
-            elif hive == "HKCR":
-                hive = "HKEY_CLASSES_ROOT"
-            elif hive == "HKU":
-                hive = "HKEY_USERS"
-        reg_key = re.sub(r"^[A-Z_]*\\", "", full_path)
-        reg_key = re.sub(r"\\[^\\]+$", "", reg_key)
-        reg_value = re.sub(r"^.*\\", "", full_path)
-        return hive, reg_key, reg_value
-    except Exception:
-        return None, None, None
+        key = winreg.OpenKey(getattr(winreg, keyType), subPath)
+        value, dataType = winreg.QueryValueEx(key, valueName)
+
+        # NOTE: REG_EXPAND_SZ case
+        if regDataTypeMapping[str(dataType)] == "REG_EXPAND_SZ" and expand is True:
+            value = winreg.ExpandEnvironmentStrings(value)
+
+        return value, None
+    except FileNotFoundError:
+        return None, {"message": "Registry key not found"}
 
 
-def query_value(full_path):
-    value_list = parse_data(full_path)
+def setValue(path: str, valueName: str, dataType: str, value):
+    keyType, subPath = extractPath(path)
+    if keyType is None or subPath is None:
+        return None, {"message": "Invalid registry key"}
+
+    if dataType not in regDataTypeList:
+        return None, {"message": "Invalid registry data type"}
+
     try:
-        opened_key = winreg.OpenKey(
-            getattr(winreg, value_list[0]), value_list[1], 0, winreg.KEY_READ
-        )
-        winreg.QueryValueEx(opened_key, value_list[2])
-        winreg.CloseKey(opened_key)
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
+        key = winreg.OpenKey(getattr(winreg, keyType), subPath, 0, winreg.KEY_WRITE)
+        print("subPath", subPath)
+        print("key", key)
 
+        if dataType == "REG_BINARY":
+            # NOTE: Convert string to hex then to bytes
+            value = bytes.fromhex(hex(int(value, 16)).removeprefix("0x"))
+        elif dataType == "REG_DWORD" or dataType == "REG_QWORD":
+            value = int(value)
+        elif dataType == "REG_MULTI_SZ":
+            value = list(value.split("\n"))
 
-def get_value(full_path):
-    value_list = parse_data(full_path)
-    try:
-        opened_key = winreg.OpenKey(
-            getattr(winreg, value_list[0]), value_list[1], 0, winreg.KEY_READ
-        )
-        value_of_value, value_type = winreg.QueryValueEx(opened_key, value_list[2])
-        winreg.CloseKey(opened_key)
-        return ["1", value_of_value]
-    except Exception:
-        return ["0", "0"]
+        winreg.SetValueEx(key, valueName, 0, getattr(winreg, dataType), value)
 
+    except FileNotFoundError:
+        return None, {"message": "Registry key not found"}
+    except TypeError:
+        return None, {"message": "Invalid registry data value"}
+    except OverflowError:
+        return None, {"message": "Data value is too large"}
 
-def dec_value(c):
-    c = c.upper()
-    if ord("0") <= ord(c) and ord(c) <= ord("9"):
-        return ord(c) - ord("0")
-    if ord("A") <= ord(c) and ord(c) <= ord("F"):
-        return ord(c) - ord("A") + 10
-    return 0
-
-
-def str_to_bin(s):
-    res = b""
-    for i in range(0, len(s), 2):
-        a = dec_value(s[i])
-        b = dec_value(s[i + 1])
-        res += (a * 16 + b).to_bytes(1, byteorder="big")
-    return res
-
-
-def str_to_dec(s):
-    s = s.upper()
-    res = 0
-    for i in range(0, len(s)):
-        v = dec_value(s[i])
-        res = res * 16 + v
-    return res
-
-
-def set_value(full_path, value, value_type):
-    value_list = parse_data(full_path)
-    try:
-        winreg.CreateKey(getattr(winreg, value_list[0]), value_list[1])
-        opened_key = winreg.OpenKey(
-            getattr(winreg, value_list[0]), value_list[1], 0, winreg.KEY_WRITE
-        )
-        if "REG_BINARY" in value_type:
-            if len(value) % 2 == 1:
-                value += "0"
-            value = str_to_bin(value)
-        if "REG_DWORD" in value_type:
-            if len(value) > 8:
-                value = value[:8]
-            value = str_to_dec(value)
-        if "REG_QWORD" in value_type:
-            if len(value) > 16:
-                value = value[:16]
-            value = str_to_dec(value)
-
-        winreg.SetValueEx(
-            opened_key, value_list[2], 0, getattr(winreg, value_type), value
-        )
-        winreg.CloseKey(opened_key)
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
-
-
-def delete_value(full_path):
-    value_list = parse_data(full_path)
-    try:
-        opened_key = winreg.OpenKey(
-            getattr(winreg, value_list[0]), value_list[1], 0, winreg.KEY_WRITE
-        )
-        winreg.DeleteValue(opened_key, value_list[2])
-        winreg.CloseKey(opened_key)
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
-
-
-def query_key(full_path):
-    value_list = parse_data(full_path)
-    try:
-        opened_key = winreg.OpenKey(
-            getattr(winreg, value_list[0]),
-            value_list[1] + r"\\" + value_list[2],
-            0,
-            winreg.KEY_READ,
-        )
-        winreg.CloseKey(opened_key)
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
-
-
-def create_key(full_path):
-    value_list = parse_data(full_path)
-    try:
-        winreg.CreateKey(
-            getattr(winreg, value_list[0]), value_list[1] + r"\\" + value_list[2]
-        )
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
-
-
-def delete_key(full_path):
-    value_list = parse_data(full_path)
-    try:
-        winreg.DeleteKey(
-            getattr(winreg, value_list[0]), value_list[1] + r"\\" + value_list[2]
-        )
-        return ["1", "1"]
-    except Exception:
-        return ["0", "0"]
+    return path, None
 
 
 def callbacks(sio: socketio.AsyncServer):
-    # @sio.on("REGISTRY:stop")
-    # def stop_edit_registry():
-    #     sio.disconnect()
+    @sio.on("REGISTRY:create_key")
+    def create_key(data):
+        return createKey(data["path"])
 
-    @sio.on("REGISTRY:edit")
-    def on_registry_edit(sid, data):
-        msg = json.loads(data.decode("utf8"))
-        # extract elements
-        ID = msg["ID"]
-        full_path = msg["path"]
-        name_value = msg["name_value"]
-        value = msg["value"]
-        v_type = msg["v_type"]
-        res = ["0", "0"]
+    @sio.on("REGISTRY:delete_key")
+    def delete_key(data):
+        return deleteKey(data["path"])
 
-        # ID==0 run file.reg
-        # path is detail of file .reg
-        if ID == 0:
-            try:
-                outout_file = os.getcwd() + "\\run.reg"
-                with open(outout_file, "w+") as f:
-                    f.write(full_path)
-                    f.close()
-                os.system(r"regedit /s " + os.getcwd() + "\\run.reg")
-                res = ["1", "1"]
-                print("file reg created")
-            except Exception:
-                res = ["0", "0"]
-                print("cannot create file reg")
+    @sio.on("REGISTRY:get_value")
+    def get_value(data):
+        return getValue(data["path"], data["valueName"], data["expand"])
 
-        elif ID == 1:
-            res = get_value(full_path + r"\\" + name_value)
-
-        elif ID == 2:
-            res = set_value(full_path + r"\\" + name_value, value, v_type)
-
-        elif ID == 3:
-            res = create_key(full_path)
-
-        elif ID == 4:
-            res = delete_key(full_path + r"\\")
-
-        return [res[0], res[1]]
+    @sio.on("REGISTRY:set_value")
+    def set_value(data):
+        return setValue(
+            data["path"], data["valueName"], data["dataType"], data["value"]
+        )
