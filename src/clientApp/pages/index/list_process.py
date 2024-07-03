@@ -24,35 +24,40 @@ class ListProcessWindow(BasePage):
         self.reload(isPrimary=False)
 
     def fetchProcess(self):
-        def handleMessageWrapper(data: list[list], type):
-            def handleMessage(data: list[list]):
+        def handleMessageWrapper(data: list[dict], err, type):
+            def handleMessage(data: list[dict], err):
+                if err is not None:
+                    PopupWindow(err["message"], label="Error!")
+                    return
+
                 self.data = []
-                procName, procId, threadCount = data
-                for i in range(len(data[0])):
+                for proc in data:
                     self.data = [
                         *self.data,
                         {
-                            "pid": procId[i],
-                            "name": procName[i],
-                            "threadCount": threadCount[i],
+                            "name": proc["name"],
+                            "pid": proc["id"],
+                            "threadCount": proc["threads"],
+                            "cpuPercent": round(proc["cpu_percent"], 2),
+                            "memoryPercent": round(proc["memory_percent"], 2),
                             "type": type,
                         },
                     ]
                 self.reload(isPrimary=False)
 
-            return handleMessage(data)
+            return handleMessage(data, err)
 
         if self.filter["proc"] is True:
             app.sio.emit(
                 "APP_PRO:list",
                 "",
-                callback=lambda data: handleMessageWrapper(data, "proc"),
+                callback=lambda data, err: handleMessageWrapper(data, err, "proc"),
             )
         elif self.filter["app"] is True:
             app.sio.emit(
                 "APP_PRO:list:app",
                 "",
-                callback=lambda data: handleMessageWrapper(data, "app"),
+                callback=lambda data, err: handleMessageWrapper(data, err, "app"),
             )
 
     def handleRowClick(self, sender, app_data, user_data):
@@ -70,13 +75,15 @@ class ListProcessWindow(BasePage):
         self.refresh()
 
     def handleKillOne(self, pid):
-        def handleMessage(status: Literal[0, 1]):
-            if status == 1:
-                self.handleRemove(pid)
-
-                PopupWindow(f"Process {pid} killed", label="Success!")
+        def handleMessage(data, err):
+            if err is not None:
+                PopupWindow(
+                    f"Cannot kill process {data}: {err["message"]}", label="Error!"
+                )
             else:
-                PopupWindow(f"Cannot kill process {pid}", label="Error!")
+                self.handleRemove(data)
+
+                PopupWindow(f"Process {data} killed", label="Success!")
 
         app.sio.emit("APP_PRO:kill", pid, callback=handleMessage)
 
@@ -158,6 +165,8 @@ class ListProcessWindow(BasePage):
                     dpg.add_table_column(label="Process Id")
                     dpg.add_table_column(label="Process Name")
                     dpg.add_table_column(label="Thread Count")
+                    dpg.add_table_column(label="CPU Percent")
+                    dpg.add_table_column(label="Memory Percent")
 
                     for data in self.data:
                         with dpg.table_row():
@@ -172,3 +181,5 @@ class ListProcessWindow(BasePage):
                             )
                             dpg.add_selectable(label=data["name"])
                             dpg.add_selectable(label=data["threadCount"])
+                            dpg.add_selectable(label=data["cpuPercent"])
+                            dpg.add_selectable(label=data["memoryPercent"])
