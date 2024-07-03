@@ -1,11 +1,10 @@
 import os
 import re
-from typing import Literal, Union
+from typing import Union
 
 import dearpygui.dearpygui as dpg
 
 from src.clientApp.app import app
-from src.server.directory_tree_server import SEPARATOR
 from src.shared.pages.base import BasePage
 from src.shared.pages.popup import PopupWindow
 
@@ -25,16 +24,20 @@ class ListDirWindow(BasePage):
         self.reload(isPrimary=False)
 
     def fetchDisk(self):
-        def handleDiskMessage(data: list):
+        def handleDiskMessage(data: list, err):
+            if err is not None:
+                PopupWindow("Cannot fetch disk", label="Error!")
+                return
+
             self.disks = data
             self.reload(isPrimary=False)
 
-        app.sio.emit("DIRECTORY:show_tree", "", callback=handleDiskMessage)
+        app.sio.emit("DIRECTORY:list_disk", "", callback=handleDiskMessage)
 
     def fetchDir(self, path, parent):
-        def handleDirMessage(data: list | dict):
-            if isinstance(data, dict) and "msg" in data:
-                msg = " (Access denied)"
+        def handleDirMessage(data: list | dict, err):
+            if err is not None:
+                msg = f" {err["message"]}"
                 label = dpg.get_item_label(parent)
                 if label is not None:
                     dpg.set_item_label(
@@ -93,20 +96,20 @@ class ListDirWindow(BasePage):
 
             # NOTE: Force early binding to avoid late binding error
             # Ref: https://stackoverflow.com/questions/3431676/creating-functions-or-lambdas-in-a-loop-or-comprehension
-            def handleMessage(status: Literal["OK", "NOT OK"], fileName=fileName):
-                if status == "OK":
-                    PopupWindow(f"Copy file {fileName} successfully!", label="Success!")
-
+            def handleMessage(data, err, filePath=filePath):
+                if err is not None:
+                    PopupWindow(f"Cannot copy file {filePath}!", label="Error!")
                 else:
-                    PopupWindow(f"Cannot copy file {fileName}!", label="Error!")
+                    PopupWindow(f"Copy file {data} successfully!", label="Success!")
 
             app.sio.emit(
-                "DIRECTORY:copyto",
+                "DIRECTORY:send",
                 {
-                    "metadata": f"{filePath}{SEPARATOR}{destPath}",
+                    "fileName": fileName,
+                    "destPath": destPath,
                     "data": open(filePath, "rb").read(),  # noqa: SIM115
                 },
-                # NOTE: We don't need to pass fileName as a parameter to the
+                # NOTE: We don't need to pass filePath as a parameter to the
                 # callback function because we are binding it to the function itself
                 callback=handleMessage,
             )
@@ -136,18 +139,27 @@ class ListDirWindow(BasePage):
 
             # NOTE: Force early binding to avoid late binding error
             # Ref: https://stackoverflow.com/questions/3431676/creating-functions-or-lambdas-in-a-loop-or-comprehension
-            def handleMessage(data: dict, filePath=filePath, destDir=destDir):
-                if isinstance(data, dict) and "msg" in data:
-                    PopupWindow(f"Cannot receive {filePath}", label="Error!")
+            def handleMessage(
+                data: dict, err, destDir=destDir, dir=dir, filePath=filePath
+            ):
+                if err is not None:
+                    PopupWindow(f"Cannot copy {filePath}", label="Error!")
                     return
+                try:
+                    with open(os.path.join(destDir, dir, data["fileName"]), "wb") as f:
+                        f.write(data["data"])
 
-                with open(os.path.join(destDir, data["filename"]), "wb") as f:
-                    f.write(data["fileData"])
-
-                PopupWindow(f"Copy {filePath} successfully!", label="Success!")
+                    PopupWindow(
+                        f"Copy {data["fileName"]} successfully!", label="Success!"
+                    )
+                except OSError as err:
+                    PopupWindow(
+                        f"Cannot copy {os.path.join(destDir, data["fileName"])}: {err}",
+                        label="Error!",
+                    )
 
             app.sio.emit(
-                "DIRECTORY:copy",
+                "DIRECTORY:receive",
                 filePath,
                 callback=handleMessage,
             )
@@ -173,16 +185,16 @@ class ListDirWindow(BasePage):
 
         filePath = self.selectedPath["path"]
 
-        def handleMessage(status: Literal["OK", "NOT OK"], filePath):
-            if status == "OK":
-                PopupWindow(f"Delete {filePath} successfully!", label="Success!")
-            else:
+        def handleMessage(data, err, filePath):
+            if err is not None:
                 PopupWindow(f"Cannot delete {filePath}!", label="Error!")
+            else:
+                PopupWindow(f"Delete {data} successfully!", label="Success!")
 
         app.sio.emit(
             "DIRECTORY:delete",
             filePath,
-            callback=lambda status: handleMessage(status, filePath),
+            callback=lambda data, err: handleMessage(data, err, filePath),
         )
 
     def render(self):
