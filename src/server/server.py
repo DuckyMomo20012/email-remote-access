@@ -42,6 +42,8 @@ if "nt" in sys.builtin_module_names:
 
     # Register registry events
     rs.callbacks(sio)
+else:
+    print("Registry not supported on this platform")
 
 
 @sio.on("QUIT")
