@@ -15,7 +15,7 @@ class SendDataRequest(TypedDict):
 def listDisk():
     disks = psutil.disk_partitions(all=False)
 
-    return [disk.device for disk in disks], None
+    return [disk.mountpoint for disk in disks], None
 
 
 def listDir(path: str):
