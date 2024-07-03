@@ -1,6 +1,9 @@
+import contextlib
+
 import psutil
 import pywinctl as pwc
 import socketio
+import Xlib
 
 
 def listProcess():
@@ -23,7 +26,6 @@ def listProcess():
 
 
 def listApp():
-    apps = pwc.getAllAppsNames()
     procs, err = listProcess()
     if err is not None:
         return None, err
@@ -31,14 +33,17 @@ def listApp():
     if procs is None:
         return None, {"message": "Error while fetching process list"}
     appList: list[dict] = []
-    for proc in procs:
-        if proc["name"] in apps:
-            appList.append(proc)
 
-    return appList, None
+    with contextlib.suppress(Xlib.error.BadWindow):
+        apps = pwc.getAllAppsNames()
+        for proc in procs:
+            if proc["name"] in apps:
+                appList.append(proc)
+
+        return appList, None
 
 
-def killApp(pid: str):
+def killProcess(pid: str):
     try:
         proc = psutil.Process(int(pid))
 
@@ -47,6 +52,8 @@ def killApp(pid: str):
         return pid, None
     except ValueError:
         return None, {"message": "Invalid PID"}
+    except psutil.NoSuchProcess:
+        return None, {"message": "Process not found"}
 
 
 def callbacks(sio: socketio.AsyncServer):
@@ -60,4 +67,4 @@ def callbacks(sio: socketio.AsyncServer):
 
     @sio.on("APP_PRO:kill")
     def on_proc_kill(sid, pid: str):
-        return killApp(pid)
+        return killProcess(pid)
