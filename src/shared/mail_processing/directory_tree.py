@@ -3,7 +3,6 @@ import uuid
 
 import socketio
 
-from src.server.directory_tree_server import SEPARATOR
 from src.shared.mail_processing.utils import Command, sendMessage
 
 
@@ -12,13 +11,20 @@ def onListDirectoryMessage(
 ):
     if not cmd["options"]:
         raise Exception("No path specified")
-        return
 
     path = cmd["options"]
 
-    def handleDirectoryData(data: str):
+    def handleDirectoryData(data: str, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
+
+        tmpTextFile = f"directory_{uuid.uuid4()}.txt"
         try:
-            tmpTextFile = f"directory_{uuid.uuid4()}.txt"
             with open(tmpTextFile, "wb") as f:
                 f.write(data.encode("utf-8"))
 
@@ -42,36 +48,38 @@ def onCopyFileToServerMessage(
 ):
     if not cmd["options"]:
         raise Exception("No file path or destination path specified")
-        return
 
     filePath, destPath = cmd["options"].split(";")
 
     if not filePath:
         raise Exception("No file path specified")
-        return
 
     if not os.path.exists(filePath):
         raise Exception(f'"{filePath}" file not found')
-        return
 
-    def handleCopyFileStatus(status: str):
-        if status == "OK":
-            resMessage = f'"{filePath}" file copied to server'
-        else:
-            resMessage = f'Cannot copy "{filePath}" file to server'
+    def handleCopyFileStatus(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
+            return
 
         sendMessage(
             service,
             reqMessage,
-            resMessage,
+            f"Copy file {data} successfully!",
             reply=reply,
         )
 
     sio.emit(
-        "DIRECTORY:copyto",
+        "DIRECTORY:send",
         {
-            "metadata": f"{filePath}{SEPARATOR}{destPath}",
-            "data": open(filePath, "rb").read(),
+            "fileName": os.path.basename(filePath),
+            "destPath": destPath,
+            "data": open(filePath, "rb").read(),  # noqa: SIM115
         },
         callback=handleCopyFileStatus,
     )
@@ -82,39 +90,33 @@ def onCopyFileToClientMessage(
 ):
     if not cmd["options"]:
         raise Exception("No file path or destination path specified")
-        return
 
     filePath, destPath = cmd["options"].split(";")
 
     if not filePath:
         raise Exception("No file path specified")
-        return
 
     if not os.path.exists(filePath):
         raise Exception(f'"{filePath}" file not found')
-        return
 
-    def handleReceiveFileData(data: dict):
-        if isinstance(data, dict) and "msg" in data:
+    def handleReceiveFileData(data: dict, err):
+        if err is not None:
             sendMessage(
                 service,
                 reqMessage,
-                data["msg"],
+                data["message"],
                 reply=reply,
             )
             return
 
         try:
-            fileName = data["filename"]
-            fileData = data["fileData"]
-
-            with open(destPath + fileName, "wb") as f:
-                f.write(fileData)
+            with open(os.path.join(destPath, data["fileName"]), "wb") as f:
+                f.write(data["data"])
 
             sendMessage(
                 service,
                 reqMessage,
-                f'"{filePath}" file copied to client',
+                f'"{data["fileName"]}" file copied to client',
                 reply=reply,
             )
 
@@ -127,7 +129,7 @@ def onCopyFileToClientMessage(
             )
             return
 
-    sio.emit("DIRECTORY:copy", filePath, callback=handleReceiveFileData)
+    sio.emit("DIRECTORY:receive", filePath, callback=handleReceiveFileData)
 
 
 def onDeleteFileMessage(
@@ -139,16 +141,20 @@ def onDeleteFileMessage(
 
     path = cmd["options"]
 
-    def handleDeleteFileStatus(status: str):
-        if status == "OK":
-            resMessage = f'"{path}" file deleted'
-        else:
-            resMessage = f'Cannot delete "{path}" file'
+    def handleDeleteFileStatus(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
+            return
 
         sendMessage(
             service,
             reqMessage,
-            resMessage,
+            f"Delete file {data} successfully!",
             reply=reply,
         )
 

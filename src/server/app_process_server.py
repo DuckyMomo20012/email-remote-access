@@ -1,9 +1,9 @@
 import contextlib
+import sys
 
 import psutil
 import pywinctl as pwc
 import socketio
-import Xlib
 
 
 def listProcess():
@@ -34,13 +34,24 @@ def listApp():
         return None, {"message": "Error while fetching process list"}
     appList: list[dict] = []
 
-    with contextlib.suppress(Xlib.error.BadWindow):
+    if "nt" in sys.builtin_module_names:
         apps = pwc.getAllAppsNames()
         for proc in procs:
             if proc["name"] in apps:
                 appList.append(proc)
 
         return appList, None
+
+    elif "posix" in sys.builtin_module_names:
+        import Xlib
+
+        with contextlib.suppress(Xlib.error.BadWindow):
+            apps = pwc.getAllAppsNames()
+            for proc in procs:
+                if proc["name"] in apps:
+                    appList.append(proc)
+
+            return appList, None
 
 
 def killProcess(pid: str):

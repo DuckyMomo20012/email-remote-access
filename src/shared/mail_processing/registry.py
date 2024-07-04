@@ -1,5 +1,3 @@
-import json
-
 import socketio
 
 from src.shared.mail_processing.utils import Command, sendMessage
@@ -12,33 +10,28 @@ def onCreateRegKey(service, sio: socketio.Client, cmd: Command, reqMessage, repl
 
     keyPath = cmd["options"]
 
-    def handleCreateRegKeyData(data: tuple[str, str]):
-        [status, message] = data
-
-        if status == "0":
-            raise Exception("Incorrect registry key specified")
+    def handleCreateRegKeyData(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
             return
 
         sendMessage(
             service,
             reqMessage,
-            f'Successfully created registry key: "{keyPath}"',
+            f'Successfully created registry key: "{data}"',
             reply=reply,
         )
 
-    req = {
-        "ID": 3,
-        "path": keyPath,
-        "name_value": "",
-        "value": "",
-        "v_type": "REG_SZ",
-    }
-
-    msg = bytes(json.dumps(req), encoding="utf-8")
-
     sio.emit(
-        "REGISTRY:edit",
-        msg,
+        "REGISTRY:create_key",
+        {
+            "path": keyPath,
+        },
         callback=handleCreateRegKeyData,
     )
 
@@ -50,33 +43,28 @@ def onDeleteRegKey(service, sio: socketio.Client, cmd: Command, reqMessage, repl
 
     keyPath = cmd["options"]
 
-    def handleDeleteRegKeyData(data: tuple[str, str]):
-        [status, message] = data
-
-        if status == "0":
-            raise Exception("Incorrect registry key specified")
+    def handleDeleteRegKeyData(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
             return
 
         sendMessage(
             service,
             reqMessage,
-            f'Successfully deleted registry key: "{keyPath}"',
+            f'Successfully deleted registry key: "{data}"',
             reply=reply,
         )
 
-    req = {
-        "ID": 4,
-        "path": keyPath,
-        "name_value": "",
-        "value": "",
-        "v_type": "",
-    }
-
-    msg = bytes(json.dumps(req), encoding="utf-8")
-
     sio.emit(
-        "REGISTRY:edit",
-        msg,
+        "REGISTRY:delete_key",
+        {
+            "path": keyPath,
+        },
         callback=handleDeleteRegKeyData,
     )
 
@@ -88,11 +76,14 @@ def onSetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply
 
     keyPath, valName, valData, valType = cmd["options"].split(";")
 
-    def handleSetRegValueData(data: tuple[str, str]):
-        [status, message] = data
-
-        if status == "0":
-            raise Exception("Incorrect information specified")
+    def handleSetRegValueData(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
             return
 
         resMessage = (
@@ -107,19 +98,14 @@ def onSetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply
             reply=reply,
         )
 
-    req = {
-        "ID": 2,
-        "path": keyPath,
-        "name_value": valName,
-        "value": valData,
-        "v_type": valType,
-    }
-
-    msg = bytes(json.dumps(req), encoding="utf-8")
-
     sio.emit(
-        "REGISTRY:edit",
-        msg,
+        "REGISTRY:set_value",
+        {
+            "path": keyPath,
+            "valueName": valName,
+            "dataType": valType,
+            "value": valData,
+        },
         callback=handleSetRegValueData,
     )
 
@@ -131,16 +117,19 @@ def onGetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply
 
     keyPath, name = cmd["options"].split(";")
 
-    def handleGetRegValueData(data: tuple[str, str]):
-        [status, message] = data
-
-        if status == "0":
-            raise Exception("Incorrect information specified")
+    def handleGetRegValueData(data, err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
             return
 
         resMessage = (
             "Successfully got registry value:\n"
-            + f"Key: {keyPath}\nName: {name}\nValue: {message}"
+            + f"Key: {keyPath}\nName: {name}\nValue: {data}"
         )
 
         sendMessage(
@@ -150,18 +139,12 @@ def onGetRegValue(service, sio: socketio.Client, cmd: Command, reqMessage, reply
             reply=reply,
         )
 
-    req = {
-        "ID": 1,
-        "path": keyPath,
-        "name_value": name,
-        "value": "",
-        "v_type": "",
-    }
-
-    msg = bytes(json.dumps(req), encoding="utf-8")
-
     sio.emit(
-        "REGISTRY:edit",
-        msg,
+        "REGISTRY:get_value",
+        {
+            "path": keyPath,
+            "valueName": name,
+            "expand": False,
+        },
         callback=handleGetRegValueData,
     )
