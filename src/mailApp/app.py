@@ -1,6 +1,7 @@
+from typing import Any
+
 import dearpygui.dearpygui as dpg
 import socketio
-from google.oauth2.credentials import Credentials
 
 from src.shared.pages.base import BasePage
 from src.shared.pages.popup import PopupWindow
@@ -9,7 +10,7 @@ from src.shared.pages.popup import PopupWindow
 class App:
     sio: socketio.Client
     histories: list[BasePage]
-    creds: Credentials | None = None
+    creds: Any | None = None
 
     def __init__(self):
         self.sio = socketio.Client()
