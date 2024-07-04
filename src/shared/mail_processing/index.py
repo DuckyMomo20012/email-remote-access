@@ -13,7 +13,6 @@ from src.shared.mail_processing.directory_tree import (
     onListDirectoryMessage,
 )
 from src.shared.mail_processing.live_screen import onScreenshotMessage
-from src.shared.mail_processing.mac_address import onMacAddressMessage
 from src.shared.mail_processing.registry import (
     onCreateRegKey,
     onDeleteRegKey,
@@ -24,12 +23,13 @@ from src.shared.mail_processing.shutdown_logout import (
     onLogoutMessage,
     onShutdownMessage,
 )
+from src.shared.mail_processing.sys_info import onSysInfoMessage
 from src.shared.mail_processing.utils import Command
 
 cmdMapping = {
     "shutdown": onShutdownMessage,
     "logout": onLogoutMessage,
-    "mac_address": onMacAddressMessage,
+    "sys_info": onSysInfoMessage,
     "screenshot": onScreenshotMessage,
     "list_directory": onListDirectoryMessage,
     "copy_file_to_server": onCopyFileToServerMessage,

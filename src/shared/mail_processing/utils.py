@@ -10,7 +10,7 @@ class Command(TypedDict):
     type: Literal[
         "shutdown",
         "logout",
-        "mac_address",
+        "sys_info",
         "screenshot",
         "list_directory",
         "copy_file_to_server",
@@ -31,7 +31,7 @@ class Command(TypedDict):
 DEFAULT_COMMANDS = [
     "shutdown",
     "logout",
-    "mac_address",
+    "sys_info",
     "screenshot",
     "list_directory",
     "copy_file_to_server",
@@ -87,7 +87,9 @@ def parseCmd(msg: str) -> list[Command]:
 
 # NOTE: This acts as a wrapper as we have to prepare some metadata before
 # sending the message
-def sendMessage(service, reqMessage, body, attachments=[], reply=True):
+def sendMessage(service, reqMessage, body, attachments=None, reply=True):
+    if attachments is None:
+        attachments = []
     userInfo = service.users().getProfile(userId="me").execute()
 
     fromUser = userInfo["emailAddress"]
