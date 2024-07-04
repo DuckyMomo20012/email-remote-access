@@ -1,14 +1,16 @@
+from typing import Any
+
 import dearpygui.dearpygui as dpg
 import socketio
-from google.oauth2.credentials import Credentials
 
 from src.shared.pages.base import BasePage
+from src.shared.pages.popup import PopupWindow
 
 
 class App:
     sio: socketio.Client
     histories: list[BasePage]
-    creds: Credentials = None
+    creds: Any | None = None
 
     def __init__(self):
         self.sio = socketio.Client()
@@ -17,10 +19,21 @@ class App:
     def __del__(self):
         self.sio.disconnect()
 
-    def goto(self, page: BasePage):
+    def goto(self, route: str):
         try:
+            from src.mailApp.routes import routes
+
+            page = routes.get(route)
+
+            if page is None:
+                raise ValueError(f"Route {route} is not found")
+
+            # NOTE: Init page
+            page = page()
+
             if len(self.histories) > 0:
                 dpg.configure_item(self.histories[-1].tag, show=False)
+
             page.render()
             # NOTE: Tag can be re-assigned while rendering
             self.histories.append(page)
@@ -31,32 +44,40 @@ class App:
                 "RuntimeError: Cannot set primary window. Please check if the window is"
                 " created with self.tag"
             )
+        except ValueError:
+            print("ValueError: Route is not found")
 
     def back(self):
         if len(self.histories) > 1:
             prevPage = self.histories.pop()
-            prevPage.__del__()
+            dpg.delete_item(prevPage.tag)
             dpg.configure_item(self.histories[-1].tag, show=True)
+
+    def callbacks(self):
+        @self.sio.event
+        def connect():
+            PopupWindow("Connected to the server!", "Connected")
+
+        @self.sio.event
+        def connect_error(data):
+            PopupWindow("Cannot connect to the server!", "Disconnected")
 
 
 app = App()
 
 
 def main():
-    from src.mailApp.pages.connect import ConnectPage
-    from src.mailApp.pages.oauth import OAuthPage
-
     dpg.create_context()
     dpg.create_viewport(title="Remote Control", width=800, height=600)
 
-    with dpg.font_registry():
+    with dpg.font_registry():  # noqa: SIM117
         # First argument ids the path to the .ttf or .otf file
         with dpg.font("assets/fonts/IBMPlexMono-Regular.ttf", 20) as default_font:
             dpg.add_font_range_hint(dpg.mvFontRangeHint_Vietnamese)
 
     dpg.bind_font(default_font)
 
-    app.goto(OAuthPage(redirect=ConnectPage))
+    app.goto("/auth")
 
     dpg.setup_dearpygui()
     dpg.show_viewport()

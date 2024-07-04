@@ -4,7 +4,6 @@ import dearpygui.dearpygui as dpg
 from socketio.exceptions import ConnectionError
 
 from src.mailApp.app import app
-from src.mailApp.pages.index.index import IndexPage
 from src.shared.pages.base import BasePage
 from src.shared.pages.error import ErrorWindow
 
@@ -39,7 +38,9 @@ class ConnectForm(BasePage):
             height=200,
             no_close=True,
         ):
-            dpg.add_input_text(tag="f_ip", label="IP", hint="127.0.0.1")
+            dpg.add_input_text(
+                tag="f_ip", label="IP", default_value="127.0.0.1", hint="127.0.0.1"
+            )
             dpg.add_input_text(
                 tag="f_port", label="Port", default_value=f"{PORT}", enabled=False
             )
@@ -61,7 +62,7 @@ class ConnectPage(BasePage):
 
             app.sio.connect(f"http://{form['ip']}:{form['port']}")
             dpg.configure_item("b_connect", label="Connect")
-            app.goto(IndexPage())
+            app.goto("/")
 
         except ConnectionError:
             dpg.configure_item("b_connect", enabled=True)
