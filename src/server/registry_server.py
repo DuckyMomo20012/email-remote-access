@@ -85,8 +85,6 @@ def setValue(path: str, valueName: str, dataType: str, value):
 
     try:
         key = winreg.OpenKey(getattr(winreg, keyType), subPath, 0, winreg.KEY_WRITE)
-        print("subPath", subPath)
-        print("key", key)
 
         if dataType == "REG_BINARY":
             # NOTE: Convert string to hex then to bytes
