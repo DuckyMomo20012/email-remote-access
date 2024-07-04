@@ -10,19 +10,24 @@ from src.shared.mail_processing.utils import Command, sendMessage
 def onListProcessMessage(
     service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
 ):
-    def handleProcessData(data: list[list]):
-        [procName, procId, threadCount] = data
-
-        processInfo = list(zip(procName, procId, threadCount))
+    def handleProcessData(data: list[dict], err):
+        if err is not None:
+            sendMessage(
+                service,
+                reqMessage,
+                err["message"],
+                reply=reply,
+            )
+            return
 
         prettyTable = tabulate.tabulate(
-            processInfo,
-            headers=["Process name", "PID", "Threads"],
+            [proc.values() for proc in data],
+            headers=["Process name", "PID", "Threads", "CPU usage", "Memory usage"],
             tablefmt="grid",
         )
 
+        tmpTextFile = f"process_{uuid.uuid4()}.txt"
         try:
-            tmpTextFile = f"process_{uuid.uuid4()}.txt"
             with open(tmpTextFile, "wb") as f:
                 f.write(prettyTable.encode("utf-8"))
 
@@ -44,19 +49,19 @@ def onListProcessMessage(
 def onListApplicationMessage(
     service, sio: socketio.Client, cmd: Command, reqMessage, reply=True
 ):
-    def handleAppData(data: list[list]):
-        [appName, procId, threadCount] = data
-
-        appInfo = list(zip(appName, procId, threadCount))
+    def handleAppData(data: list[dict], err):
+        if err is not None:
+            sendMessage(service, reqMessage, err["message"], reply=reply)
+            return
 
         prettyTable = tabulate.tabulate(
-            appInfo,
-            headers=["App name", "PID", "Threads"],
+            [proc.values() for proc in data],
+            headers=["App name", "PID", "Threads", "CPU usage", "Memory usage"],
             tablefmt="grid",
         )
 
+        tmpTextFile = f"app_{uuid.uuid4()}.txt"
         try:
-            tmpTextFile = f"app_{uuid.uuid4()}.txt"
             with open(tmpTextFile, "wb") as f:
                 f.write(prettyTable.encode("utf-8"))
 
@@ -80,24 +85,19 @@ def onKillProcessMessage(
 ):
     if not cmd["options"]:
         raise Exception("No PID specified")
-        return
 
     pid = cmd["options"]
 
-    def handleKillStatus(status: bool):
-        if status:
-            sendMessage(
-                service,
-                reqMessage,
-                f"Process with PID {pid} killed",
-                reply=reply,
-            )
-        else:
-            sendMessage(
-                service,
-                reqMessage,
-                f"Process with PID {pid} not found",
-                reply=reply,
-            )
+    def handleKillStatus(data, err):
+        if err is not None:
+            sendMessage(service, reqMessage, err["message"], reply=reply)
+            return
+
+        sendMessage(
+            service,
+            reqMessage,
+            f"Process with PID {data} killed",
+            reply=reply,
+        )
 
     sio.emit("APP_PRO:kill", pid, callback=handleKillStatus)
