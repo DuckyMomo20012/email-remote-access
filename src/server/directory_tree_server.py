@@ -33,6 +33,9 @@ def listDir(path: str):
 
 def listDirPretty(path: str):
     try:
+        if not os.path.isdir(path):
+            return None, {"message": "Invalid path"}
+
         # NOTE: r is for raw string, to prevent invalid path
         tree_dir = seedir.seedir(rf"{path}", printout=False, style="emoji")
 
