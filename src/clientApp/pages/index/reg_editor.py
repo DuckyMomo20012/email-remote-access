@@ -1,3 +1,4 @@
+import sys
 from typing import Union
 
 import dearpygui.dearpygui as dpg
@@ -165,6 +166,10 @@ class RegistryEditorWindow(BasePage):
 
     def render(self):
         with dpg.group(tag=self.tag, parent=self.parent):  # noqa: SIM117
+            if "nt" not in sys.builtin_module_names:
+                dpg.add_text("Registry not supported on this platform")
+                return
+
             dpg.add_text("Choose an action to continue:")
             with dpg.group(horizontal=True):
                 dpg.add_button(
