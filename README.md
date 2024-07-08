@@ -98,7 +98,10 @@
 - Client App:
 
 <div align="center">
-  <img src="https://user-images.githubusercontent.com/64480713/234620646-cd42fc24-a787-4572-9725-b14ce9648be9.png" alt="client_app_screenshot" />
+  <img src="https://github.com/DuckyMomo20012/email-remote-access/assets/64480713/1dd8b44c-5d75-47d6-a951-dab379617463" alt="client_app_live_screenshot" />
+  <img src="https://github.com/DuckyMomo20012/email-remote-access/assets/64480713/f54f7cc5-95d7-4160-b204-e86bbb609e14" alt="client_app_reg_screenshot" />
+  <img src="https://github.com/DuckyMomo20012/email-remote-access/assets/64480713/3cb42753-f410-4c1f-81c7-f22dfdfb7089" alt="client_app_list_dir_screenshot" />
+  <img src="https://github.com/DuckyMomo20012/email-remote-access/assets/64480713/7b4577d9-0ac9-437c-a04a-a2a34d0b8217" alt="client_app_list_proc_screenshot" />
 </div>
 
 - Mail App:
@@ -137,6 +140,7 @@
 
 - **Client App:** A simple GUI app to control a remote computer
 
+  - Linux support.
   - Shutdown/logout:
     - [x] Shutdown computer.
     - [x] Logout computer.
@@ -214,7 +218,7 @@ variables.
 
 ### :bangbang: Prerequisites
 
-- Python: `>= 3.9`.
+- Python: `>= 3.12`.
 
 - This project uses [Poetry](https://python-poetry.org/) as package manager:
 
@@ -226,12 +230,6 @@ variables.
 
   Read more about installation on
   [Poetry documentation](https://python-poetry.org/docs/master/#installation).
-
-- Tkinter:
-
-  ```bash
-  sudo apt-get install python3-tk
-  ```
 
 <!-- Run Locally -->
 
@@ -253,6 +251,8 @@ Install dependencies:
 
 ```bash
 poetry install
+
+pre-commit install
 ```
 
 OR:
@@ -296,12 +296,6 @@ Start the program:
 
   ```bash
   poe dev server
-  ```
-
-- **Server App (legacy):**
-
-  ```bash
-  poe dev server:legacy
   ```
 
 - **Client App:**
@@ -408,9 +402,11 @@ Connect to the server by entering the server's IP address and port:
 This app will connect to the server and allow you to control the server machine
 by running commands sent from email.
 
-> **Note**: To use this app, you need to provide the `credentials.json` file in
-> the root directory. Please follow the instructions on the page:
-> [Python quickstart](https://developers.google.com/gmail/api/quickstart/python)
+> [!NOTE]
+>
+> To use this app, you need to provide the `credentials.json` file in the root
+> directory. Please follow the instructions on the page:
+> [**Python quickstart**](https://developers.google.com/gmail/api/quickstart/python)
 > to create your own App and download the `credentials.json` file.
 
 Run the mail app:
@@ -433,8 +429,10 @@ After you log in, you will be asked to give the app permissions:
 The token will be saved in the file `token.json` in the root directory of the
 project.
 
-> **Warning**: The file `credentials.json` and `token.json` are **sensitive
-> files**, **DO NOT** share them with anyone.
+> [!WARNING]
+>
+> The file `credentials.json` and `token.json` are **sensitive files**, **DO
+> NOT** share them with anyone.
 
 #### Connect to the server
 
@@ -455,7 +453,7 @@ in the email MUST follow the [instruction format](#instruction-format).
 
 ```
 (shutdown:)(logout)
-(mac_address)
+(sys_info)
 (screenshot)
 (list_directory:C:\Users\VINH\Desktop)
 (list_process:)
@@ -466,6 +464,7 @@ in the email MUST follow the [instruction format](#instruction-format).
 (delete_file:C:\Users\VINH\Desktop\tmp.txt)
 (create_registry_key:HKEY_CURRENT_USER\Software\MyKey)
 (set_registry_value:HKEY_CURRENT_USER\Software\MyKey;foo;bar;REG_SZ)
+(set_registry_value:HKEY_CURRENT_USER\Software\MyKey;foo;foo\nbar\nbaz;REG_MULTI_SZ)
 (get_registry_value:HKEY_CURRENT_USER\Software\MyKey;foo)
 (delete_registry_key:HKEY_CURRENT_USER\Software\MyKey)
 ```
@@ -555,18 +554,18 @@ pattern = (
     (logout)
     ```
 
-- `mac_address`: Get the MAC address of the server machine.
+- `sys_info`: Get information of the server machine (MAC address, CPU, RAM).
 
   - **Instruction**:
 
     ```
-    (mac_address)
+    (sys_info)
     ```
 
   - Example:
 
     ```
-    (mac_address)
+    (sys_info)
     ```
 
 - `screenshot`: Take a screenshot of the server machine.
@@ -602,7 +601,9 @@ pattern = (
 - `copy_file_to_server`: Copy a file from the client machine to the server
   machine.
 
-  > **Warning**: The file size **MUST** be **less than 1MB**.
+  > [!WARNING]
+  >
+  > The file size **MUST** be **less than 1MB**.
 
   - **Instruction**:
 
@@ -629,7 +630,9 @@ pattern = (
 - `copy_file_to_client`: Copy a file from the server machine to the client
   machine.
 
-  > **Warning**: The file size **MUST** be **less than 1MB**.
+  > [!WARNING]
+  >
+  > The file size **MUST** be **less than 1MB**.
 
   - **Instruction**:
 
@@ -763,10 +766,9 @@ pattern = (
         - `REG_BINARY`.
         - `REG_DWORD`.
         - `REG_QWORD`.
-        - `REG_EXPAND_SZ`.
-      - The unsupported value types are:
-        - `REG_MULTI_SZ` ([instruction](#instruction-format)'s `options` doesn't
-          support multiline options).
+        - `REG_EXPAND_SZ`. Note: `server` does support expand variables but the
+          client app and mail app don't.
+        - `REG_MULTI_SZ`. Use `\n` to separate the values. E.g. `foo\nbar`.
 
   - Example:
 
@@ -905,11 +907,12 @@ Options:
 ## :compass: Roadmap
 
 - [x] Rebuild the server with `Dear PyGui`.
-- [ ] Rebuild the client app with `Dear PyGui`.
+- [x] Rebuild the client app with `Dear PyGui`.
 - [x] Support more features for Mail App.
   - [x] Copy files to the client computer.
   - [x] Copy files to the server computer.
   - [x] Delete files.
+- [x] Linux support.
 
 <!-- Contributing -->
 
