@@ -13,7 +13,7 @@ class App:
     creds: Any | None = None
 
     def __init__(self):
-        self.sio = socketio.Client()
+        self.sio = socketio.Client(logger=True)
         self.histories = []
 
     def __del__(self):
