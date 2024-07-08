@@ -52,7 +52,7 @@ class OAuthPage(BasePage):
             dpg.add_text("Checking authorization...", tag="t_oauth_status")
             dpg.add_button(
                 label="Redirect",
-                callback=lambda: app.goto("/"),
+                callback=lambda: app.goto("/connect"),
                 tag="b_redirect",
                 show=False,
             )

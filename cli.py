@@ -1,32 +1,31 @@
 from enum import Enum
+from typing import Annotated
 
 import typer
 from environs import Env
 
-TService = Enum(  # type: ignore
-    "Service",
-    {
-        k: k
-        for k in [
-            "server",
-            "server:mail",
-            "client",
-            "mail",
-        ]
-    },
-)
+
+class Service(str, Enum):
+    server = "server"
+    server_mail = "server:mail"
+    client = "client"
+    mail = "mail"
+
 
 env = Env()
 # Read .env into os.environ
 env.read_env()
 
 
-def main(service: TService = typer.Argument("server", help="Service to run")):  # noqa: B008
+def main(
+    service: Annotated[Service, typer.Argument()] = Service.server,
+):
     if str(service) == "Service.server":
         import src.serverApp.app as serverApp
 
         serverApp.main()
-    elif str(service) == "Service.server:mail":
+    elif str(service) == "Service.server_mail":
+        print("Starting mail server...")
         import src.mailServer.server as server
 
         server.main()

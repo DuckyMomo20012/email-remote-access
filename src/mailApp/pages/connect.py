@@ -1,4 +1,4 @@
-from typing import Callable, Optional, TypedDict, Union
+from typing import Union
 
 import dearpygui.dearpygui as dpg
 from socketio.exceptions import ConnectionError
@@ -10,25 +10,26 @@ from src.shared.pages.error import ErrorWindow
 PORT = 5656
 
 
-class TConnectForm(TypedDict):
-    ip: str
-    port: int
-
-
-class ConnectForm(BasePage):
-    def __init__(
-        self,
-        tag: Union[int, str] = "w_connect_form",
-        onSubmit: Optional[Callable[[TConnectForm], None]] = None,
-    ):
+class ConnectPage(BasePage):
+    def __init__(self, tag: Union[int, str] = "w_auth"):
         super().__init__(tag)
-        self.onSubmit = onSubmit
 
-    def handleSubmit(self, callback: Optional[Callable[[TConnectForm], None]] = None):
-        ip = dpg.get_value("f_ip")
-        port = dpg.get_value("f_port")
-        if callback:
-            callback({"ip": ip, "port": port})
+    def handleConnectClick(self):
+        try:
+            ip = dpg.get_value("f_ip")
+            port = dpg.get_value("f_port")
+
+            dpg.configure_item("b_connect", enabled=False)
+            dpg.configure_item("b_connect", label="Connecting...")
+
+            app.sio.connect(f"http://{ip}:{port}")
+            dpg.configure_item("b_connect", label="Connect")
+            app.goto("/")
+
+        except ConnectionError:
+            dpg.configure_item("b_connect", enabled=True)
+            dpg.configure_item("b_connect", label="Connect")
+            ErrorWindow("Cannot connect to server")
 
     def render(self):
         with dpg.window(
@@ -46,30 +47,6 @@ class ConnectForm(BasePage):
             )
             dpg.add_button(
                 label="Connect",
-                callback=lambda: self.handleSubmit(self.onSubmit),
+                callback=self.handleConnectClick,
                 tag="b_connect",
             )
-
-
-class ConnectPage(BasePage):
-    def __init__(self, tag: Union[int, str] = "w_auth"):
-        super().__init__(tag)
-
-    def connect(self, form: TConnectForm):
-        try:
-            dpg.configure_item("b_connect", enabled=False)
-            dpg.configure_item("b_connect", label="Connecting...")
-
-            app.sio.connect(f"http://{form['ip']}:{form['port']}")
-            dpg.configure_item("b_connect", label="Connect")
-            app.goto("/")
-
-        except ConnectionError:
-            dpg.configure_item("b_connect", enabled=True)
-            dpg.configure_item("b_connect", label="Connect")
-            ErrorWindow("Cannot connect to server")
-
-    def render(self):
-        connectForm = ConnectForm(onSubmit=self.connect)
-        connectForm.render()
-        self.tag = connectForm.tag
