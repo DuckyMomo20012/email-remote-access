@@ -93,7 +93,12 @@ def setValue(path: str, valueName: str, dataType: str, value):
             value = int(value)
         elif dataType == "REG_MULTI_SZ":
             # Ref: https://stackoverflow.com/a/53396459/12512981
-            value = list(value.split("\n"))
+            value = list(
+                re.split(
+                    "\n|\\\\n",
+                    value,
+                )
+            )
 
         winreg.SetValueEx(key, valueName, 0, getattr(winreg, dataType), value)
 
