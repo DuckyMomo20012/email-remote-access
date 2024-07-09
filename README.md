@@ -272,7 +272,9 @@ Export Poetry dependencies to file `requirements.txt`:
 poetry export -f requirements.txt --output requirements.txt
 ```
 
-> **Note**: You can add option: `--dev` to include development dependencies.
+> [!NOTE]
+>
+> You can add option: `--dev` to include development dependencies.
 
 </details>
 
@@ -473,7 +475,9 @@ in the email MUST follow the [instruction format](#instruction-format).
 
 The instruction in the email MUST follow the format:
 
-> **Note**: Each `instruction` doesn't have to be on a separate line.
+> [!NOTE]
+>
+> Each `instruction` doesn't have to be on a separate line.
 
 ```
 <autoRun>(<type>:<options>)
@@ -483,6 +487,8 @@ The instruction in the email MUST follow the format:
   The allowed values are `#`.
 
   - If the value is `#`, the command will be executed automatically.
+  - If the value is `!`, the command will **NOT** be executed automatically on
+    the **Mail server**.
   - If the value is empty, the command will be executed when you click the `Run`
     button.
 
@@ -502,7 +508,9 @@ E.g.:
 
 ```
 #(command) # run automatically
-# (command) # not run automatically
+# (command) # not a valid instruction
+!(command) # not run automatically
+! (command) # not a valid instruction
 
 (command) # without options
 (command:option1;option2) # with multiple options
@@ -601,10 +609,6 @@ pattern = (
 - `copy_file_to_server`: Copy a file from the client machine to the server
   machine.
 
-  > [!WARNING]
-  >
-  > The file size **MUST** be **less than 1MB**.
-
   - **Instruction**:
 
     ```
@@ -627,12 +631,12 @@ pattern = (
     `C:\Users\Alice\Desktop\` on the server machine. The final path of the file
     is: `C:\Users\Alice\Desktop\test.txt`.
 
+> [!WARNING]
+>
+> The file size **MUST** be **less than 1MB**.
+
 - `copy_file_to_client`: Copy a file from the server machine to the client
   machine.
-
-  > [!WARNING]
-  >
-  > The file size **MUST** be **less than 1MB**.
 
   - **Instruction**:
 
@@ -655,6 +659,10 @@ pattern = (
     This will copy the file `test.txt` from the server machine to the directory
     `C:\Users\Alice\Desktop\` on the client machine. The final path of the file
     is: `C:\Users\Alice\Desktop\test.txt`.
+
+> [!WARNING]
+>
+> The file size **MUST** be **less than 1MB**.
 
 - `delete_file`: Delete a file on the server machine.
 
@@ -761,13 +769,18 @@ pattern = (
     - `valueData`: The data of the value to set.
     - `valueType`: The type of the value to set. The value type is
       **case-sensitive**.
+
       - The supported value types are:
+
         - `REG_SZ`.
         - `REG_BINARY`.
         - `REG_DWORD`.
         - `REG_QWORD`.
-        - `REG_EXPAND_SZ`. Note: `server` does support expand variables but the
-          client app and mail app don't.
+        - `REG_EXPAND_SZ`.
+
+          > **Note**: `server` does support expand variables but the client app
+          > and mail app don't.
+
         - `REG_MULTI_SZ`. Use `\n` to separate the values. E.g. `foo\nbar`.
 
   - Example:
@@ -823,16 +836,19 @@ attachments.
 To change the email reply type to a separate email, you can uncheck the setting:
 `Settings > Send response as reply`.
 
-> **Note**: There is a known issue when executing multiple instructions at the
-> same time, it will cause the SSL error. So please execute one instruction
-> after a short time (about ~2 seconds).
+> [!NOTE]
+>
+> There is a known issue when executing multiple instructions at the same time,
+> it will cause the SSL error. So please execute one instruction after a short
+> time (about ~2 seconds).
 
 ### Mail Server
 
 [⬆️ Back to top](#notebook_with_decorative_cover-table-of-contents)
 
 This is the server that will do everything that the [Mail App](#mail-app) can
-do, but it will not have the GUI.
+do, but it will not have the GUI, and it will **automatically execute the email
+instructions**.
 
 Run the mail server:
 
@@ -899,8 +915,10 @@ Options:
   --help  Show this message and exit.
 ```
 
-> **Note**: This is an entry point for all the services. Each service should be
-> run from this entry point to make the absolute import work.
+> [!NOTE]
+>
+> This is an entry point for all the services. Each service should be run from
+> this entry point to make the absolute import work.
 
 <!-- Roadmap -->
 
